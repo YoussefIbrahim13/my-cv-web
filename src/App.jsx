@@ -39,7 +39,7 @@ const textData = {
     eduTitle: "[EDUCATION]",
     eduCompany: "El Shorouk Academy, Cairo",
     eduSub: "Bachelor of Science in Computer Science (Expected Graduation: June 2026)",
-    eduCourse: "[RELEVANT_COURSEWORK]: Object-Oriented Programming (OOP), SOLID Principles, Software Design Patterns, Systems Analysis & Design, Relational Database Systems.",
+    eduCourse: "[RELEVANT_COURSEWORK]: Object-Oriented Programming (OOP), Software Design Patterns, Systems Analysis & Design, Relational Database Systems.",
     leadTitle: "[LEADERSHIP_SOFT_SKILLS]",
     leadCompany: "IEEE SHA Student Branch",
     leadSub: "Head of Media and Branding | Oct 2023 – Feb 2025",
@@ -185,7 +185,7 @@ function App() {
             <h3>{currentText.objectiveTitle}</h3>
             <p style={{ fontSize: '1.25rem', lineHeight: '1.7' }}>{currentText.objectiveDesc}</p>
             <div className="bio-meta">
-              <span>LOC: Benha, Egypt</span>
+              <span>LOC: Egypt</span>
               <span>STATUS: Active_Dev</span>
               <span>FIELD: Full_Stack_DotNet</span>
             </div>
