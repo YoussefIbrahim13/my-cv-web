@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Lenis from 'lenis';
-import myProfileImg from './assets/me.jpg'; 
+import myProfileImg from './assets/me.jpg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,15 +49,15 @@ const textData = {
     projTitle1: "PETZY",
     projDesc1: "Veterinary clinic booking, e-commerce ecosystem, and AI-powered diagnostic assistance backend built with Clean Architecture pattern.",
     projTag1: "GRADUATION PROJECT",
-    projLink1: "https://github.com/Veterinaryclinics/Backend/tree/Devolpment", 
+    projLink1: "https://github.com/Veterinaryclinics/Backend/tree/Devolpment",
     projTitle2: "ATTENDANCE SYSTEM",
     projDesc2: "Full-stack employee management system with real-time tracking, dynamic validation, designed using the Factory Design Pattern.",
     projTag2: "SYSTEM PROJECT",
-    projLink2: "https://github.com/YoussefIbrahim13/Attendance-and-departure-system", 
+    projLink2: "https://github.com/YoussefIbrahim13/Attendance-and-departure-system",
     projTitle3: "PEER CAR",
     projDesc3: "An ASP.NET Core MVC application for peer-to-peer car rentals featuring secure workflows, car listing management, and chatbot integration.",
     projTag3: "WEB APPLICATION",
-    projLink3: "https://github.com/YoussefIbrahim13/PeerCar", 
+    projLink3: "https://github.com/YoussefIbrahim13/PeerCar",
   },
   ar: {
     langBtn: "[ AR // EN ]",
@@ -129,32 +129,89 @@ function App() {
   }, []);
 
   useGSAP(() => {
-    gsap.to('.scene-1 .hero-box', {
-      opacity: 0, scale: 0.3, y: -50,
-      scrollTrigger: { trigger: '.scene-1', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+    const mm = gsap.matchMedia();
+
+    mm.add("(min-width: 769px)", () => {
+      gsap.to('.scene-1 .hero-box', {
+        opacity: 0, scale: 0.3, y: -50,
+        scrollTrigger: { trigger: '.scene-1', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+      });
+      gsap.to('.scene-2 .content-box', {
+        opacity: 0, scale: 0.3, y: -50,
+        scrollTrigger: { trigger: '.scene-2', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+      });
+      gsap.to('.scene-3 .content-box', {
+        opacity: 0, scale: 0.3, y: -50,
+        scrollTrigger: { trigger: '.scene-3', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+      });
+      gsap.to('.scene-4 .content-box', {
+        opacity: 0, scale: 0.3, y: -50,
+        scrollTrigger: { trigger: '.scene-4', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+      });
+      gsap.to('.scene-5 .content-box', {
+        opacity: 0, scale: 0.3, y: -50,
+        scrollTrigger: { trigger: '.scene-5', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+      });
+
+      const projects = gsap.utils.toArray('.project-card');
+      gsap.to(projects, {
+        xPercent: -100 * (projects.length - 1),
+        ease: "none",
+        scrollTrigger: {
+          trigger: '.scene-6',
+          pin: true,
+          scrub: 1,
+          start: 'top top',
+          end: () => `+=${document.querySelector('.scene-6').offsetWidth}`
+        }
+      });
     });
-    gsap.to('.scene-2 .content-box', {
-      opacity: 0, scale: 0.3, y: -50,
-      scrollTrigger: { trigger: '.scene-2', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+
+    mm.add("(max-width: 768px)", () => {
+      gsap.utils.toArray('.scene').forEach(scene => {
+        gsap.fromTo(scene,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1, y: 0,
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: scene,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
+
+      gsap.utils.toArray('.info-block').forEach((block, i) => {
+        gsap.fromTo(block,
+          { opacity: 0, x: i % 2 === 0 ? -40 : 40 },
+          {
+            opacity: 1, x: 0,
+            scrollTrigger: {
+              trigger: block,
+              start: 'top 88%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
+
+      gsap.utils.toArray('.project-card').forEach(card => {
+        gsap.fromTo(card,
+          { opacity: 0, scale: 0.9 },
+          {
+            opacity: 1, scale: 1,
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
+      });
     });
-    gsap.to('.scene-3 .content-box', {
-      opacity: 0, scale: 0.3, y: -50,
-      scrollTrigger: { trigger: '.scene-3', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-    });
-    gsap.to('.scene-4 .content-box', {
-      opacity: 0, scale: 0.3, y: -50,
-      scrollTrigger: { trigger: '.scene-4', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-    });
-    gsap.to('.scene-5 .content-box', {
-      opacity: 0, scale: 0.3, y: -50,
-      scrollTrigger: { trigger: '.scene-5', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-    });
-    const projects = gsap.utils.toArray('.project-card');
-    gsap.to(projects, {
-      xPercent: -100 * (projects.length - 1),
-      ease: "none",
-      scrollTrigger: { trigger: '.scene-6', pin: true, scrub: 1, start: 'top top', end: () => `+=${document.querySelector('.scene-6').offsetWidth}` }
-    });
+
   }, { scope: containerRef });
 
   const toggleLanguage = () => {
@@ -163,11 +220,11 @@ function App() {
 
   return (
     <div ref={containerRef} className={`app-container ${lang === 'ar' ? 'rtl-mode' : ''}`}>
-      
+
       <button className="lang-toggle-btn" onClick={toggleLanguage}>
         {currentText.langBtn}
       </button>
-      
+
       <section className="scene scene-1">
         <div className="hero-box">
           <img src={myProfileImg} alt="Youssef Ibrahim" className="profile-img" />
@@ -197,63 +254,38 @@ function App() {
         <div className="content-box">
           <h2>{currentText.skillsTitle}</h2>
           <div className="profile-grid eight-cards">
-            
             <div className="info-block">
               <h3>[CORE_LANGUAGES]</h3>
-              <div className="skills-tags">
-                <span>C#</span><span>Python</span>
-              </div>
+              <div className="skills-tags"><span>C#</span><span>Python</span></div>
             </div>
-
             <div className="info-block">
               <h3>[CS_FOUNDATIONS]</h3>
-              <div className="skills-tags">
-                <span>Data Structures</span><span>Algorithms</span><span>OOP</span>
-              </div>
+              <div className="skills-tags"><span>Data Structures</span><span>Algorithms</span><span>OOP</span></div>
             </div>
-
             <div className="info-block">
               <h3>[BACKEND_FRAMEWORKS]</h3>
-              <div className="skills-tags">
-                <span>ASP.NET Core</span><span>Entity Framework Core</span><span>FastAPI</span>
-              </div>
+              <div className="skills-tags"><span>ASP.NET Core</span><span>Entity Framework Core</span><span>FastAPI</span></div>
             </div>
-
             <div className="info-block">
               <h3>[API_COMMUNICATION]</h3>
-              <div className="skills-tags">
-                <span>RESTful APIs</span><span>WebSockets</span>
-              </div>
+              <div className="skills-tags"><span>RESTful APIs</span><span>WebSockets</span></div>
             </div>
-
             <div className="info-block">
               <h3>[FRONTEND_UI]</h3>
-              <div className="skills-tags">
-                <span>Blazor</span><span>MudBlazor</span>
-              </div>
+              <div className="skills-tags"><span>Blazor</span><span>MudBlazor</span></div>
             </div>
-
             <div className="info-block">
               <h3>[CLOUD_PLATFORMS]</h3>
-              <div className="skills-tags">
-                <span>Microsoft Azure</span>
-              </div>
+              <div className="skills-tags"><span>Microsoft Azure</span></div>
             </div>
-
             <div className="info-block">
               <h3>[ARCHITECTURE_PRINCIPLES]</h3>
-              <div className="skills-tags">
-                <span>Clean Architecture</span><span>SOLID Principles</span>
-              </div>
+              <div className="skills-tags"><span>Clean Architecture</span><span>SOLID Principles</span></div>
             </div>
-
             <div className="info-block">
               <h3>[DATABASES]</h3>
-              <div className="skills-tags">
-                <span>SQL Server</span><span>Schema Design</span><span>Query Optimization</span>
-              </div>
+              <div className="skills-tags"><span>SQL Server</span><span>Schema Design</span><span>Query Optimization</span></div>
             </div>
-
           </div>
         </div>
       </section>
@@ -318,28 +350,24 @@ function App() {
 
       <section className="scene scene-6">
         <div className="projects-wrapper">
-          
           <a href={currentText.projLink1} target="_blank" rel="noopener noreferrer" className="project-card">
             <h3>{currentText.projTitle1}</h3>
             <p>{currentText.projDesc1}</p>
             <div className="card-tech">.NET Core / EF Core / AI Integration</div>
             <span>{currentText.projTag1}</span>
           </a>
-
           <a href={currentText.projLink2} target="_blank" rel="noopener noreferrer" className="project-card">
             <h3>{currentText.projTitle2}</h3>
             <p>{currentText.projDesc2}</p>
             <div className="card-tech">ASP.NET Core API / Blazor / SQL Server</div>
             <span>{currentText.projTag2}</span>
           </a>
-
           <a href={currentText.projLink3} target="_blank" rel="noopener noreferrer" className="project-card">
             <h3>{currentText.projTitle3}</h3>
             <p>{currentText.projDesc3}</p>
             <div className="card-tech">ASP.NET Core MVC / SQL Server</div>
             <span>{currentText.projTag3}</span>
           </a>
-
         </div>
       </section>
 
