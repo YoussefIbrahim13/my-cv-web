@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Lenis from 'lenis';
+import { Analytics } from '@vercel/analytics/react';
 import myProfileImg from './assets/me.jpg';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -383,6 +384,7 @@ function App() {
         </div>
       </div>
 
+      <Analytics />
     </div>
   );
 }
