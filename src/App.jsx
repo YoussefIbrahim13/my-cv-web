@@ -19,9 +19,9 @@ const TEXT = {
     resume: 'RESUME ↓',
     whoami: 'whoami',
     name: 'Youssef Ibrahim',
-    role: 'Backend Developer — .NET 8 / ASP.NET Core',
+    role: 'Software Engineer — .NET · Python · Flutter',
     summary:
-      'Computer Science graduate building RESTful APIs, relational data models and layered architectures — Clean Architecture, Modular Monolith, CQRS. Six systems shipped: authentication, payments, background jobs, real-time communication and AI services.',
+      "I'm a Computer Science graduate who builds systems end to end: .NET APIs on Clean Architecture and CQRS, Python services for LLM agents, and offline-first Flutter apps. Six shipped so far — authentication, payments, background jobs, real-time and AI.",
     chipLoc: 'CAIRO, EGYPT',
     ctaProjects: 'VIEW PROJECTS',
     ctaCv: 'DOWNLOAD CV',
@@ -46,9 +46,9 @@ const TEXT = {
     resume: 'السيرة ↓',
     whoami: 'من أنا',
     name: 'يوسف إبراهيم',
-    role: 'مطوّر Backend — ‎.NET 8 / ASP.NET Core',
+    role: 'مهندس برمجيات — ‎.NET · Python · Flutter',
     summary:
-      'خريج علوم حاسب أبني واجهات REST البرمجية ونماذج البيانات العلاقية والمعماريات الطبقية — Clean Architecture و Modular Monolith و CQRS. ستة أنظمة متكاملة تغطي المصادقة والمدفوعات ومعالجة المهام في الخلفية والاتصال الفوري وخدمات الذكاء الاصطناعي.',
+      'خريج علوم حاسب، أبني أنظمة متكاملة من أولها لآخرها: واجهات ‎.NET‎ برمجية على Clean Architecture و CQRS، وخدمات Python لوكلاء الذكاء الاصطناعي، وتطبيقات Flutter تعمل دون اتصال. ستة أنظمة أنجزتها حتى الآن تغطي المصادقة والمدفوعات ومهام الخلفية والاتصال الفوري والذكاء الاصطناعي.',
     chipLoc: 'القاهرة، مصر',
     ctaProjects: 'استعرض المشاريع',
     ctaCv: 'تحميل السيرة',
@@ -69,22 +69,69 @@ const TEXT = {
 
 /* The hero graph is the shape of a backend in general — the layers and concerns
    that recur across every project below — rather than any one system's module
-   map. Individual systems get their own diagram on their card. */
+   map. Individual systems get their own diagram on their card.
+
+   Laid out as the request actually travels: entry at the top, the database as
+   the sink at the bottom, off-request-path concerns (workers, real-time, AI) to
+   the sides. */
 const NODES = [
-  { label: 'API', x: 0.545, y: 0.2, kind: 'gate' },
-  { label: 'Auth · JWT', x: 0.72, y: 0.1, kind: 'svc' },
-  { label: 'Controllers', x: 0.88, y: 0.19, kind: 'svc' },
-  { label: 'CQRS', x: 0.665, y: 0.36, kind: 'svc' },
-  { label: 'Domain', x: 0.855, y: 0.42, kind: 'svc' },
-  { label: 'Workers', x: 0.6, y: 0.55, kind: 'svc' },
-  { label: 'Real-time', x: 0.775, y: 0.615, kind: 'svc' },
-  { label: 'AI Services', x: 0.9, y: 0.7, kind: 'svc' },
-  { label: 'Cache', x: 0.685, y: 0.775, kind: 'svc' },
-  { label: 'SQL Server', x: 0.83, y: 0.885, kind: 'db' },
+  { id: 'api', label: 'API', x: 0.56, y: 0.10, kind: 'gate' },
+  { id: 'auth', label: 'Auth · JWT', x: 0.79, y: 0.09, kind: 'svc' },
+  { id: 'controllers', label: 'Controllers', x: 0.90, y: 0.23, kind: 'svc' },
+  { id: 'cqrs', label: 'CQRS', x: 0.70, y: 0.29, kind: 'svc' },
+  { id: 'domain', label: 'Domain', x: 0.58, y: 0.45, kind: 'svc' },
+  { id: 'cache', label: 'Cache', x: 0.87, y: 0.44, kind: 'svc' },
+  { id: 'realtime', label: 'Real-time', x: 0.76, y: 0.62, kind: 'svc' },
+  { id: 'workers', label: 'Workers', x: 0.56, y: 0.68, kind: 'svc' },
+  { id: 'ai', label: 'AI Services', x: 0.90, y: 0.75, kind: 'svc' },
+  { id: 'sql', label: 'SQL Server', x: 0.70, y: 0.89, kind: 'db' },
 ];
-const EDGES = [
-  [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [3, 4], [1, 3], [2, 4], [5, 6],
-  [4, 6], [6, 7], [5, 8], [6, 8], [8, 9], [6, 9], [4, 9], [3, 9], [7, 9],
+
+/* Every edge is a real dependency, written upstream → downstream so the packets
+   animating along them read as work flowing toward the database. */
+const EDGE_IDS = [
+  // The request path, in pipeline order.
+  ['api', 'auth'],            // authentication middleware runs on every request
+  ['auth', 'controllers'],    // an authenticated request reaches routing
+  ['controllers', 'cqrs'],    // the controller dispatches a command or query
+  ['cqrs', 'domain'],         // the handler invokes the domain's business rules
+  ['domain', 'sql'],          // state is persisted through EF Core
+  ['cqrs', 'sql'],            // read handlers project straight out of EF Core
+  // Caching sits in front of the store.
+  ['cqrs', 'cache'],          // query handlers read through the cache first
+  ['cache', 'sql'],           // a miss falls through to the database
+  // Background work: hosted services in the same host, off the request path.
+  ['api', 'workers'],         // IHostedService instances live in the API host
+  ['workers', 'domain'],      // timers apply domain state-machine transitions
+  ['workers', 'sql'],         // each tick resolves its own scoped DbContext
+  ['workers', 'realtime'],    // finished jobs notify connected clients
+  // Real-time and AI.
+  ['auth', 'realtime'],       // hubs authenticate off the same bearer token
+  ['domain', 'realtime'],     // domain events fan out to subscribers
+  ['controllers', 'realtime'],// endpoints broadcast through IHubContext
+  ['realtime', 'ai'],         // the hub proxies a model and streams the reply
+  ['controllers', 'ai'],      // direct request/response AI endpoints
+  // Identity's own persistence.
+  ['auth', 'sql'],            // the ASP.NET Core Identity user store
+];
+
+const EDGES = EDGE_IDS.map(([a, b]) => [
+  NODES.findIndex((n) => n.id === a),
+  NODES.findIndex((n) => n.id === b),
+]);
+
+/* One request's trip through an ASP.NET Core host, in the order it actually
+   happens: the server accepts it, the middleware pipeline runs (the JWT bearer
+   handler among it), the endpoint's action is invoked, it hands off to the
+   application layer, and the write reaches the database through EF Core. */
+const PIPELINE = [
+  'KESTREL',
+  'MIDDLEWARE',
+  'AUTH · JWT',
+  'CONTROLLER',
+  'HANDLER',
+  'EF CORE',
+  'SQL SERVER',
 ];
 
 const PROJECTS = [
@@ -851,6 +898,9 @@ export default function App() {
   const [lang, setLang] = useState('en');
   const [flipped, setFlipped] = useState({});
   const t = TEXT[lang];
+  /* The pipeline is a flex row, so RTL lays it out right-to-left — a "→" would
+     then point back up the pipeline instead of along it. */
+  const arrow = t.dir === 'rtl' ? '←' : '→';
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -887,7 +937,7 @@ export default function App() {
         <div className="hero-inner">
           <div className="hero-content">
             <p className="prompt">
-              <span className="prompt-host">youssef@backend:~$</span>
+              <span className="prompt-host">youssef@dev:~$</span>
               {t.whoami}
               <span className="caret" aria-hidden="true" />
             </p>
@@ -896,9 +946,10 @@ export default function App() {
             <p className="hero-summary">{t.summary}</p>
             <div className="chips">
               <span className="chip">{t.chipLoc}</span>
-              <span className="chip">.NET 8 · EF CORE 8</span>
+              <span className="chip">.NET 8 · ASP.NET CORE</span>
               <span className="chip">CLEAN ARCH · CQRS</span>
-              <span className="chip">SQL SERVER</span>
+              <span className="chip">PYTHON · FASTAPI · LLM</span>
+              <span className="chip">FLUTTER</span>
             </div>
             <div className="btn-row">
               <a href="#projects" className="btn-accent">
@@ -915,16 +966,16 @@ export default function App() {
             <span className="pipeline-dot" aria-hidden="true" />
           </div>
           <div className="pipeline-row">
-            <span className="pipe-endpoint">GET /api/appointments/available</span>
-            <span className="pipe-arrow">→</span>
-            {['KESTREL', 'MIDDLEWARE · JWT', 'CONTROLLER', 'APPLICATION SERVICE', 'EF CORE', 'SQL SERVER'].map((stage, i) => (
+            <span className="pipe-endpoint">GET /api/{'{resource}'}</span>
+            <span className="pipe-arrow">{arrow}</span>
+            {PIPELINE.map((stage, i) => (
               <span key={stage} style={{ display: 'contents' }}>
                 <span className="pipe-stage" style={{ animationDelay: `${0.15 + i * 0.6}s` }}>{stage}</span>
-                {i < 5 && <span className="pipe-arrow">→</span>}
+                {i < PIPELINE.length - 1 && <span className="pipe-arrow">{arrow}</span>}
               </span>
             ))}
             <span className="pipe-gap" />
-            <span className="pipe-status">200 OK · 41 ms</span>
+            <span className="pipe-status">200 OK · JSON</span>
           </div>
         </div>
 

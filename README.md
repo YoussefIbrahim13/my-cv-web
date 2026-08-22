@@ -1,7 +1,7 @@
 # Youssef Ibrahim — Portfolio
 
-A bilingual (English / Arabic) single-page portfolio for **Youssef Ibrahim**, backend developer
-(.NET 8 / ASP.NET Core). Six shipped systems, each presented as a flip card: the front is the
+A bilingual (English / Arabic) single-page portfolio for **Youssef Ibrahim**, software engineer
+(.NET · Python · Flutter). Six shipped systems, each presented as a flip card: the front is the
 pitch, the back is the real architecture.
 
 Built with React + Vite on the **Nocturne** design system, with a live canvas service-graph in the
