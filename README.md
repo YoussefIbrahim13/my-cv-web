@@ -1,16 +1,55 @@
-# React + Vite
+# Youssef Ibrahim — Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A bilingual (English / Arabic) single-page portfolio for **Youssef Ibrahim**, backend developer
+(.NET 8 / ASP.NET Core). Six shipped systems, each presented as a flip card: the front is the
+pitch, the back is the real architecture.
 
-Currently, two official plugins are available:
+Built with React + Vite on the **Nocturne** design system, with a live canvas service-graph in the
+hero and Vercel Web Analytics for visitor stats.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Getting started
 
-## React Compiler
+```bash
+npm install
+npm run dev      # dev server with HMR
+npm run build    # production build to dist/
+npm run preview  # serve the production build
+npm run lint     # eslint
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Structure
 
-## Expanding the ESLint configuration
+| Path | Purpose |
+| --- | --- |
+| `src/App.jsx` | All content and layout — copy in `TEXT`, projects in `PROJECTS`, one arch diagram component per project. |
+| `src/nocturne.css` | The Nocturne design system: tokens (`--color-*`, `--space-*`, `--radius-*`) and base type. Do not hard-code values these tokens already carry. |
+| `src/portfolio.css` | The page layer built on those tokens. |
+| `public/uploads/` | The CV PDF the nav and hero link to. |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Editing content
+
+Copy is data, not markup:
+
+- **`TEXT.en` / `TEXT.ar`** — page-level prose. Both languages must define the same keys.
+- **`PROJECTS`** — one entry per card. Each carries `en` / `ar` copy (`tag`, `sub`, `desc`, `note`),
+  a `tech` tag list, the `repo` URL, and flags: `wide` (spans both grid columns), `alt` (uses the
+  secondary accent), `titleSmall`.
+- **`ARCH`** — maps a project `id` to its architecture-diagram component, rendered on the card back.
+
+Tech names (`.NET 8`, `EF Core`, repo URLs) are deliberately kept out of `TEXT` since they read the
+same in both languages.
+
+The grid is two columns, so `wide` cards should stay in even numbers or sit at the ends — currently
+Petzy opens the section and RecruitBot closes it, bracketing two rows of pairs.
+
+## Architecture claims
+
+Every diagram was checked against the actual repository before it was written — module counts,
+worker responsibilities, rate limits and hosting models all reflect what the code does, not what
+the pitch would prefer. If a repo changes shape, update the card with it.
+
+## Analytics
+
+`@vercel/analytics` is mounted in `App.jsx`. Enable **Web Analytics** in the Vercel project
+dashboard and it reports visitors, page views, country, device, browser and referrer. It is
+cookie-free, so no consent banner is required.

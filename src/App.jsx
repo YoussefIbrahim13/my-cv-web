@@ -1,390 +1,921 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-import Lenis from 'lenis';
-import myProfileImg from './assets/me.jpg';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
-gsap.registerPlugin(ScrollTrigger);
+const CV_URL = '/uploads/Youssef_Ibrahim_Backend_NET_CV.pdf';
+const GITHUB_USER = 'https://github.com/YoussefIbrahim13';
+const LINKEDIN = 'https://www.linkedin.com/in/youssef-ibrahim-1322004sh192007';
+const EMAIL = 'yy7692651@gmail.com';
+const ACCENT = '#38bdf8';
 
-const textData = {
+/* Copy only. Tech names read the same in both languages, so stacks, tags and
+   the architecture diagrams live in PROJECTS rather than here. */
+const TEXT = {
   en: {
-    langBtn: "[ EN // AR ]",
-    heroTitle: "Welcome to Youssef's CV",
-    heroSubtitle: "> SOFTWARE ENGINEER",
-    sec1Title: "01 // CORE_MISSION",
-    objectiveTitle: "[OBJECTIVE]",
-    objectiveDesc: "A results-driven, deeply passionate Software Engineer with a relentless hunger for continuous learning and architectural excellence. Highly proficient in engineering robust backend ecosystems using ASP.NET Core and building modern, high-performance web applications and lightweight services with FastAPI. Expert at establishing ultra-fast real-time communication protocols via WebSockets, crafting interactive user interfaces with Blazor, and seamlessly embedding Artificial Intelligence capabilities into production-grade solutions. Heavily dedicated to clean code architecture and SOLID principles.",
-    skillsTitle: "[TECHNICAL_SKILLS]",
-    sec2Title: "02 // ENGINEERING_LOGS",
-    expTitle: "[EXPERIENCE]",
-    expCompany: "Microtec International (In-house)",
-    expSub: "June 2025 – September 2025",
-    expL1: "Gained hands-on experience in C# and SQL Server with a focus on query optimization, schema design, and data handling.",
-    expL2: "Built modular and reusable components using OOP principles.",
-    expL3: "Utilized LINQ for efficient and readable data operations.",
-    expL4: "Developed a full-featured ASP.NET Core MVC application integrating front-end and back-end using the MVC pattern.",
-    expL5: "Implemented secure and scalable RESTful APIs using ASP.NET Core.",
-    expL6: "Worked with Entity Framework Core for database access and CRUD operations.",
-    expL7: "Demonstrated exceptional performance in backend development (.NET Core & C#), focusing on strong problem-solving and analytical skills.",
-    expL8: "Gained valuable Full Stack experience by building and integrating robust front-end components using Blazor.",
-    expL9: "Maintained a high level of professionalism and contributed effectively through excellent teamwork and collaboration.",
-    trainTitle: "[TRAINING]",
-    trainCompany: "Route IT Training Center (Remote)",
-    trainSub: "ASP.NET Core Advanced Diploma — 2024",
-    trainL1: "Developed secure, end-to-end scalable RESTful APIs integrating industry-standard design workflows.",
-    trainL2: "Mastered Entity Framework Core pipelines for professional relational database access and advanced CRUD operations.",
-    trainL3: "Utilized clean OOP standards and LINQ utilities for clean and highly readable backend data operations.",
-    sec3Title: "03 // ACADEMIC_LEADERSHIP",
-    eduTitle: "[EDUCATION]",
-    eduCompany: "El Shorouk Academy, Cairo",
-    eduSub: "Bachelor of Science in Computer Science (Expected Graduation: June 2026)",
-    eduCourse: "[RELEVANT_COURSEWORK]: Object-Oriented Programming (OOP), Software Design Patterns, Systems Analysis & Design, Relational Database Systems.",
-    leadTitle: "[LEADERSHIP_SOFT_SKILLS]",
-    leadCompany: "IEEE SHA Student Branch",
-    leadSub: "Head of Media and Branding | Oct 2023 – Feb 2025",
-    leadL1: "Led overall media and creative branding strategies, managing promotional digital assets.",
-    leadL2: "Coordinated seamlessly with cross-functional technical teams to sustain a high-level public image.",
-    leadL3: "[SOFT_SKILLS]: Agile problem solving, effective communication, and task coordination.",
-    projTitle1: "PETZY",
-    projDesc1: "Veterinary clinic booking, e-commerce ecosystem, and AI-powered diagnostic assistance backend built with Clean Architecture pattern.",
-    projTag1: "GRADUATION PROJECT",
-    projLink1: "https://github.com/Veterinaryclinics/Backend/tree/Devolpment",
-    projTitle2: "ATTENDANCE SYSTEM",
-    projDesc2: "Full-stack employee management system with real-time tracking, dynamic validation, designed using the Factory Design Pattern.",
-    projTag2: "SYSTEM PROJECT",
-    projLink2: "https://github.com/YoussefIbrahim13/Attendance-and-departure-system",
-    projTitle3: "PEER CAR",
-    projDesc3: "An ASP.NET Core MVC application for peer-to-peer car rentals featuring secure workflows, car listing management, and chatbot integration.",
-    projTag3: "WEB APPLICATION",
-    projLink3: "https://github.com/YoussefIbrahim13/PeerCar",
+    dir: 'ltr',
+    langBtn: '[ EN // AR ]',
+    navProjects: 'PROJECTS',
+    navContact: 'CONTACT',
+    resume: 'RESUME ↓',
+    whoami: 'whoami',
+    name: 'Youssef Ibrahim',
+    role: 'Backend Developer — .NET 8 / ASP.NET Core',
+    summary:
+      'Computer Science graduate building RESTful APIs, relational data models and layered architectures — Clean Architecture, Modular Monolith, CQRS. Six systems shipped: authentication, payments, background jobs, real-time communication and AI services.',
+    chipLoc: 'CAIRO, EGYPT',
+    ctaProjects: 'VIEW PROJECTS',
+    ctaCv: 'DOWNLOAD CV',
+    scroll: 'SCROLL',
+    projectsKicker: 'PROJECTS',
+    projectsTitle: 'Systems I designed and shipped',
+    projectsIntro:
+      'Six systems, each with a different architectural problem at its centre — bounded modules under one host, a rental lifecycle as a state machine, two APIs under one orchestrator, a hybrid AI fact-checker, an offline-first client, and an agent graph that validates what it finds.',
+    flipHint: 'CLICK ANY CARD TO SEE ITS ARCHITECTURE',
+    seeArch: 'SEE ARCHITECTURE',
+    archLabel: 'MODULE MAP',
+    moreOnGithub: 'MORE ON GITHUB — 20+ REPOSITORIES',
   },
   ar: {
-    langBtn: "[ AR // EN ]",
-    heroTitle: "مرحباً بك في موقع يوسف",
-    heroSubtitle: "> مهندس برمجيات",
-    sec1Title: "01 // المهمة الأساسية",
-    objectiveTitle: "[الهدف المهني]",
-    objectiveDesc: "مهندس برمجيات استثنائي ذو شغف عارم بالتعلم المستمر ومواجهة التحديات المعمارية المعقدة. يتميز بكفاءة عالية في هندسة الأنظمة الخلفية القوية والآمنة باستخدام ASP.NET Core، وبناء الخدمات المصغرة (Microservices) وتطبيقات الويب فائقة السرعة والخفة عبر إطار العمل FastAPI. محترف في تمكين بروتوكولات الاتصال الفوري الحي باستخدام WebSockets، وتصميم واجهات مستخدم تفاعلية متطورة بواسطة Blazor وMudBlazor، بالإضافة إلى الدمج المتقدم لقدرات الذكاء الاصطناعي في بيئات الإنتاج الفعلية، مع الالتزام المطلق بمعايير الكود النظيف ومبادئ SOLID البرمجية.",
-    skillsTitle: "[المهارات التقنية]",
-    sec2Title: "02 // السجلات الهندسية",
-    expTitle: "[الخبرة العملية]",
-    expCompany: "مايكروتك الدولية (Microtec International)",
-    expSub: "يونيو 2025 – سبتمبر 2025",
-    expL1: "اكتساب خبرة عملية في C# وSQL Server مع التركيز على تحسين الاستعلامات، وتصميم الهياكل (Schema)، ومعالجة البيانات.",
-    expL2: "بناء مكونات برمجية مجزأة وقابلة لإعادة الاستخدام باستخدام مبادئ ومفاهيم OOP.",
-    expL3: "استخدم أداة LINQ لإجراء عمليات كفاءة وبيانات واضحة ومباشرة القراءة.",
-    expL4: "تطوير تطبيق ASP.NET Core MVC متكامل الميزات يربط بين الواجهات الأمامية والخلفية باستخدام نمط الـ MVC.",
-    expL5: "تنفيذ واجهات برمجة تطبيقات RESTful آمنة وقابلة للتوسع بالكامل باستخدام تقنيات ASP.NET Core.",
-    expL6: "التعامل والربط المتقدم مع Entity Framework Core للوصول السلس لقواعد البيانات وعمليات CRUD.",
-    expL7: "إظهار أداء استثنائي في تطوير الأنظمة الخلفية (.NET Core & C#) مع التركيز على المهارات التحليلية وحل المشكلات المعقدة.",
-    expL8: "اكتساب خبرة Full Stack قيمة من خلال بناء ودمج مكونات واجهة مستخدم قوية وتفاعلية باستخدام Blazor.",
-    expL9: "الحفاظ على مستوى عالٍ من الاحترافية والمساهمة الفعالة داخل بيئة العمل من خلال العمل الجماعي المتميز.",
-    trainTitle: "[التدريب الاحترافي]",
-    trainCompany: "مركز روت للتدريب (Route IT Center)",
-    trainSub: "دبلومة ASP.NET Core المتقدمة — 2024",
-    trainL1: "تطوير واجهات برمجة تطبيقات RESTful آمنة وقابلة للتوسع بالكامل مع دمج سير العمل القياسي.",
-    trainL2: "إتقان التعامل مع Entity Framework Core للوصول الاحترافي إلى قواعد البيانات وتطوير عمليات CRUD المتقدمة.",
-    trainL3: "استخدام معايير OOP النظيفة وأدوات LINQ لكتابة عمليات بيانات خلفية واضحة وعالية القراءة.",
-    sec3Title: "03 // السجل الأكاديمي القيادي",
-    eduTitle: "[التعليم]",
-    eduCompany: "أكاديمية الشروق، القاهرة",
-    eduSub: "بكالوريوس علوم الحاسب (التخرج المتوقع: يونيو 2026)",
-    eduCourse: "[المواد الدراسية ذات الصلة]: البرمجة كائنية التوجه (OOP) ، أنماط التصميم البرمجي، تحليل وتصميم النظم، نظم قواعد البيانات العلاقاتية.",
-    leadTitle: "[القدرات القيادية والشخصية]",
-    leadCompany: "فرع IEEE SHA الطلابي",
-    leadSub: "رئيس لجنة الميديا والبراندينج | أكتوبر 2023 – فبراير 2025",
-    leadL1: "قيادة استراتيجيات الميديا الإبداعية وإدارة الأصول الرقمية الترويجية للمؤسسة.",
-    leadL2: "التنسيق السلس مع الفرق التقنية المختلفة للحفاظ على صورة عامة قوية ومتناسقة للبراند.",
-    leadL3: "[المهارات الشخصية]: حل المشكلات المعقدة بمرونة، التواصل الفعال، وتنسيق المهام والمشاريع.",
-    projTitle1: "PETZY",
-    projDesc1: "نظام متكامل لحجز عيادات الطب البيطري، والتجارة الإلكترونية، مع دعم التشخيص الذكي بالذكاء الاصطناعي مبني بنظام Clean Architecture.",
-    projTag1: "مشروع التخرج",
-    projLink1: "https://github.com/Veterinaryclinics/Backend",
-    projTitle2: "ATTENDANCE SYSTEM",
-    projDesc2: "نظام Full-stack لإدارة حضور وانصراف الموظفين مع تتبع فوري، وفحص ديناميكي، ومصمم باستخدام نمط Factory Design Pattern.",
-    projTag2: "مشروع نظام متكامل",
-    projLink2: "https://github.com/yy7692651/Attendance-and-departure-system",
-    projTitle3: "PEER CAR",
-    projDesc3: "تطبيق ASP.NET Core MVC لتأجير السيارات بين الأفراد يتميز بسير عمل آمن، وإدارة القوائم، ودمج الشات بوت الذكي.",
-    projTag3: "تطبيق ويب",
-    projLink3: "https://github.com/YoussefIbrahim13/PeerCar",
-  }
+    dir: 'rtl',
+    langBtn: '[ AR // EN ]',
+    navProjects: 'المشاريع',
+    navContact: 'التواصل',
+    resume: 'السيرة ↓',
+    whoami: 'من أنا',
+    name: 'يوسف إبراهيم',
+    role: 'مطوّر Backend — ‎.NET 8 / ASP.NET Core',
+    summary:
+      'خريج علوم حاسب أبني واجهات REST البرمجية ونماذج البيانات العلاقية والمعماريات الطبقية — Clean Architecture و Modular Monolith و CQRS. ستة أنظمة متكاملة تغطي المصادقة والمدفوعات ومعالجة المهام في الخلفية والاتصال الفوري وخدمات الذكاء الاصطناعي.',
+    chipLoc: 'القاهرة، مصر',
+    ctaProjects: 'استعرض المشاريع',
+    ctaCv: 'تحميل السيرة',
+    scroll: 'انزل',
+    projectsKicker: 'المشاريع',
+    projectsTitle: 'أنظمة صمّمتها ونفّذتها',
+    projectsIntro:
+      'ستة أنظمة، كل منها يضع مشكلة معمارية مختلفة في قلبه: وحدات محدودة خلف مضيف واحد، دورة تأجير كآلة حالات، واجهتان تحت منسّق واحد، مدقّق حقائق هجين بالذكاء الاصطناعي، تطبيق يعمل دون اتصال، ووكيل يتحقق ممّا يجده قبل أن يعرضه.',
+    flipHint: 'اضغط أي بطاقة لعرض معماريتها',
+    seeArch: 'اعرض المعمارية',
+    archLabel: 'خريطة الوحدات',
+    moreOnGithub: 'المزيد على GITHUB — أكثر من ٢٠ مستودعًا',
+  },
 };
 
-function App() {
-  const containerRef = useRef();
-  const [lang, setLang] = useState('en');
-  const currentText = textData[lang];
+/* The hero graph mirrors Petzy's real module map: one API host, eight bounded
+   modules, one SQL Server database. */
+const NODES = [
+  { label: 'API Host', x: 0.545, y: 0.2, kind: 'gate' },
+  { label: 'Security', x: 0.72, y: 0.1, kind: 'svc' },
+  { label: 'Clinics', x: 0.9, y: 0.19, kind: 'svc' },
+  { label: 'Pets', x: 0.665, y: 0.36, kind: 'svc' },
+  { label: 'Appointments', x: 0.855, y: 0.42, kind: 'svc' },
+  { label: 'E-commerce', x: 0.6, y: 0.55, kind: 'svc' },
+  { label: 'Chat', x: 0.775, y: 0.615, kind: 'svc' },
+  { label: 'Chatbot', x: 0.935, y: 0.7, kind: 'svc' },
+  { label: 'Video Calls', x: 0.685, y: 0.775, kind: 'svc' },
+  { label: 'SQL Server', x: 0.83, y: 0.885, kind: 'db' },
+];
+const EDGES = [
+  [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [3, 4], [1, 3], [2, 4], [5, 6],
+  [4, 6], [6, 7], [5, 8], [6, 8], [8, 9], [6, 9], [4, 9], [3, 9], [7, 9],
+];
+
+const PROJECTS = [
+  {
+    id: 'petzy',
+    num: '01',
+    title: 'Petzy',
+    wide: true,
+    repo: 'https://github.com/Veterinaryclinics/Backend',
+    archId: '01 · PETZY',
+    tech: ['.NET 8', 'ASP.NET CORE WEB API', 'MODULAR MONOLITH', 'EF CORE', 'SQL SERVER', 'SIGNALR'],
+    en: {
+      tag: 'GRADUATION PROJECT',
+      sub: 'Backend Developer · veterinary care platform',
+      desc: 'The backend for a full veterinary platform serving a Flutter client and an AI service: eight bounded modules behind a single API host, with cross-cutting concerns in a shared Building Blocks layer. I owned the appointment booking domain end to end — entities, validation rules and the API contracts the mobile team consumed across a multi-repo Git workflow.',
+      note: 'Modular monolith — module boundaries enforced in code, one deployable, one database.',
+    },
+    ar: {
+      tag: 'مشروع التخرج',
+      sub: 'مطوّر Backend · منصة رعاية بيطرية',
+      desc: 'الواجهة الخلفية لمنصة رعاية بيطرية متكاملة تخدم تطبيق Flutter وخدمة ذكاء اصطناعي: ثماني وحدات محدودة خلف مضيف API واحد، مع الاهتمامات المشتركة في طبقة Building Blocks. توليت نطاق حجز المواعيد بالكامل — الكيانات وقواعد التحقق وعقود الـ API التي استهلكها فريق الموبايل عبر سير عمل متعدد المستودعات.',
+      note: 'Modular Monolith — حدود الوحدات مفروضة في الكود، نشر واحد وقاعدة بيانات واحدة.',
+    },
+  },
+  {
+    id: 'peercar',
+    num: '02',
+    title: 'PeerCar',
+    repo: 'https://github.com/YoussefIbrahim13/PeerCar',
+    archId: '02 · PEERCAR',
+    tech: ['ASP.NET CORE MVC', 'CLEAN ARCHITECTURE', 'SIGNALR', 'IDENTITY · OAUTH 2.0', 'BACKGROUND WORKERS'],
+    en: {
+      tag: 'PERSONAL PROJECT',
+      sub: 'Peer-to-peer car rental marketplace',
+      desc: 'Clean Architecture marketplace where the rental lifecycle is modelled as a state machine and enforced by two background workers — one auto-completing finished bookings, one cancelling expired ones. Identity with Google OAuth 2.0, role-based access for Admin / Owner / Renter, and an AI assistant streaming replies over SignalR.',
+      note: 'One deployable, four layers — domain entities stay plain POCOs with no framework types.',
+    },
+    ar: {
+      tag: 'مشروع شخصي',
+      sub: 'سوق تأجير سيارات بين الأفراد',
+      desc: 'سوق مبني على Clean Architecture، حيث تُنمذج دورة حياة التأجير كآلة حالات ينفّذها عاملان في الخلفية: أحدهما يُكمل الحجوزات المنتهية تلقائيًا والآخر يلغي المنتهية صلاحيتها. مع ASP.NET Core Identity و Google OAuth 2.0 وصلاحيات لأدوار المسؤول والمالك والمستأجر، ومساعد ذكاء اصطناعي يبثّ الردود عبر SignalR.',
+      note: 'نشر واحد بأربع طبقات — كيانات الـ Domain تبقى POCO بلا أي أنواع من إطار العمل.',
+    },
+  },
+  {
+    id: 'attendance',
+    num: '03',
+    title: 'Attendance & Departure',
+    titleSmall: true,
+    repo: 'https://github.com/YoussefIbrahim13/Attendance-and-departure-system',
+    archId: '03 · HR SYSTEM',
+    tech: ['.NET ASPIRE', 'CQRS + MEDIATR', 'BLAZOR WASM', 'JWT · RBAC', 'CSV PIPELINE'],
+    en: {
+      tag: 'TEAM PROJECT',
+      sub: 'HR attendance, hours and leave requests',
+      desc: 'Two APIs — Auth and File-Import — orchestrated by a .NET Aspire AppHost and structured around CQRS with MediatR. A CSV bulk-import pipeline validates dynamically and calculates working hours, surfaced through daily, monthly and yearly views behind JWT and role-based authorisation.',
+      note: 'Aspire AppHost wires service discovery, configuration and the dashboard.',
+    },
+    ar: {
+      tag: 'مشروع جماعي',
+      sub: 'نظام حضور وساعات عمل وإجازات',
+      desc: 'واجهتا API — المصادقة واستيراد الملفات — ينسّقهما ‎.NET Aspire AppHost وتُبنى حول CQRS مع MediatR. خط استيراد CSV يتحقق ديناميكيًا ويحسب ساعات العمل، ويُعرض في تقارير يومية وشهرية وسنوية خلف JWT وصلاحيات قائمة على الأدوار.',
+      note: 'Aspire AppHost يربط اكتشاف الخدمات والإعدادات ولوحة المتابعة.',
+    },
+  },
+  {
+    id: 'bedoonhabd',
+    num: '04',
+    title: 'Bedoon Habd',
+    alt: true,
+    repo: 'https://github.com/YoussefIbrahim13/Bdoon-habd',
+    archId: '04 · بدون هبد',
+    tech: ['FASTAPI', 'GROQ LLAMA 3.3', 'WEBSOCKETS', 'JWT · GOOGLE AUTH', 'FLUTTER RTL'],
+    en: {
+      tag: 'AI + BACKEND',
+      sub: 'FastAPI service for an Arabic party game',
+      desc: 'A country-facts game — pass-and-play locally or in online rooms over WebSockets — where a human judge can consult a "Smart Judge". The FastAPI backend classifies each claim, then routes it: objective claims are answered by Llama 3.3 grounded in a structured country fact sheet, general ones by a compound model with live web search. Verdicts are advisory — the human always decides.',
+      note: 'Three quota layers — per-IP limit, global budget, shared app token — keep the free tier alive.',
+    },
+    ar: {
+      tag: 'ذكاء اصطناعي + Backend',
+      sub: 'خدمة FastAPI لِلعبة عربية',
+      desc: 'لعبة معلومات عن الدول — تُلعب بتمرير الهاتف محليًا أو في غرف أونلاين عبر WebSockets — ويستطيع الحكم البشري استشارة «الحكم الذكي». الخدمة الخلفية تصنّف كل ادعاء ثم توجهه: الادعاءات الموضوعية يجيب عنها Llama 3.3 مستندًا إلى بطاقة بيانات منظّمة للدولة، والعامة يجيب عنها نموذج مركّب مع بحث ويب مباشر. الأحكام استشارية — القرار النهائي للإنسان.',
+      note: 'ثلاث طبقات حماية للحصة — حد لكل IP، وميزانية عامة، ورمز تطبيق مشترك.',
+    },
+  },
+  {
+    id: 'awradi',
+    num: '05',
+    title: 'Awradi',
+    alt: true,
+    repo: 'https://github.com/YoussefIbrahim13/Awradi_app',
+    archId: '05 · AWRADI',
+    tech: ['FLUTTER', 'RIVERPOD', 'DRIFT · SQLITE', 'SCHEDULED NOTIFICATIONS', 'SHA-256 INTEGRITY'],
+    en: {
+      tag: 'MOBILE · OFFLINE-FIRST',
+      sub: 'Daily Islamic ritual tracker',
+      desc: 'An offline-first Flutter app with no server: Drift/SQLite for daily progress and khatmah tracking, a timezone-aware notification scheduler for reminders, an offline Quran pack downloaded and verified by SHA-256 before extraction, and a qibla compass from device sensors and geolocation.',
+      note: 'Domain logic — progress, khatmah, notification ids, qibla math — is unit tested.',
+    },
+    ar: {
+      tag: 'موبايل · يعمل دون اتصال',
+      sub: 'متتبّع أوراد يومية',
+      desc: 'تطبيق Flutter يعمل دون اتصال ودون سيرفر: قاعدة Drift/SQLite لتتبّع التقدّم اليومي والخَتْمَة، ومجدول إشعارات يراعي المنطقة الزمنية، وحزمة قرآن تُنزَّل ويُتحقق من سلامتها بـ SHA-256 قبل فكّها، وبوصلة قبلة من مستشعرات الجهاز والموقع.',
+      note: 'منطق النطاق — التقدّم والخَتْمَة ومعرّفات الإشعارات وحساب القبلة — مغطّى باختبارات.',
+    },
+  },
+  {
+    id: 'recruitbot',
+    num: '06',
+    title: 'RecruitBot',
+    wide: true,
+    alt: true,
+    repo: 'https://github.com/YoussefIbrahim13/Job_Search-_Agent',
+    archId: '06 · RECRUITBOT',
+    tech: ['LANGGRAPH', 'GROQ LLAMA 3.3 70B', 'TAVILY SEARCH', 'FASTAPI', 'PYMUPDF · PYTHON-DOCX'],
+    en: {
+      tag: 'AGENTIC AI',
+      sub: 'Job search agent that validates what it finds',
+      desc: 'An agent that finds real, currently open postings rather than zombie listings. A LangGraph state machine drives Llama 3.3 70B, which fires two parallel Tavily queries per turn across eleven approved job boards. Every result then runs a five-layer quality pipeline ending in a live 8KB head fetch that catches closure badges before the sidebar noise corrupts the signal.',
+      note: 'Skills are harvested by pre-compiled regex before the prompt is built — the model never invents a skill.',
+    },
+    ar: {
+      tag: 'وكيل ذكاء اصطناعي',
+      sub: 'وكيل بحث عن وظائف يتحقق ممّا يجده',
+      desc: 'وكيل يبحث عن إعلانات وظائف مفتوحة فعلًا لا إعلانات ميتة. آلة حالات على LangGraph تقود Llama 3.3 70B، الذي يطلق استعلامَي Tavily متوازيين في كل دورة عبر أحد عشر موقع توظيف معتمد. ثم تمرّ كل نتيجة على خط جودة من خمس طبقات ينتهي بجلب حي لأول 8 كيلوبايت يكشف شارات الإغلاق قبل أن تلوّث ضوضاء الصفحة الإشارة.',
+      note: 'المهارات تُستخرج بتعبيرات نمطية مُجهّزة قبل بناء الطلب — النموذج لا يخترع مهارة أبدًا.',
+    },
+  },
+];
+
+/* ── Hero canvas ─────────────────────────────────────────────────────────
+   A live service graph: packets travel the edges, nodes pulse on arrival and
+   the three nearest nodes trace to the cursor. Paused when the hero scrolls
+   away so it costs nothing once the visitor is reading the projects. */
+function HeroGraph({ accent }) {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.5,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-    gsap.ticker.lagSmoothing(0);
-    return () => { lenis.destroy(); };
-  }, []);
+    const cv = canvasRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
+    let w = 0;
+    let h = 0;
+    let raf = 0;
+    let heroVisible = true;
+    const mouse = { x: -9999, y: -9999, on: false };
+    const nodes = NODES.map((n) => ({ ...n, ox: 0, oy: 0, px: 0, py: 0, pulse: 0 }));
+    const packets = [];
+    const density = 5;
 
-    mm.add("(min-width: 769px)", () => {
-      gsap.to('.scene-1 .hero-box', {
-        opacity: 0, scale: 0.3, y: -50,
-        scrollTrigger: { trigger: '.scene-1', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = cv.clientWidth;
+      h = cv.clientHeight;
+      if (!w || !h) return;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      nodes.forEach((n) => {
+        n.px = n.x * w;
+        n.py = n.y * h;
       });
-      gsap.to('.scene-2 .content-box', {
-        opacity: 0, scale: 0.3, y: -50,
-        scrollTrigger: { trigger: '.scene-2', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-      });
-      gsap.to('.scene-3 .content-box', {
-        opacity: 0, scale: 0.3, y: -50,
-        scrollTrigger: { trigger: '.scene-3', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-      });
-      gsap.to('.scene-4 .content-box', {
-        opacity: 0, scale: 0.3, y: -50,
-        scrollTrigger: { trigger: '.scene-4', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-      });
-      gsap.to('.scene-5 .content-box', {
-        opacity: 0, scale: 0.3, y: -50,
-        scrollTrigger: { trigger: '.scene-5', start: 'top top', end: 'bottom top', scrub: true, pin: true, pinSpacing: false }
-      });
+      // Paint one frame straight away so the graph is never blank between
+      // layout and the first animation frame (which a background tab defers).
+      render(performance.now());
+    };
+    const parent = cv.parentElement;
+    const onMove = (e) => {
+      const r = cv.getBoundingClientRect();
+      mouse.x = e.clientX - r.left;
+      mouse.y = e.clientY - r.top;
+      mouse.on = true;
+    };
+    const onLeave = () => {
+      mouse.on = false;
+      mouse.x = -9999;
+      mouse.y = -9999;
+    };
+    parent.addEventListener('mousemove', onMove);
+    parent.addEventListener('mouseleave', onLeave);
 
-      const projects = gsap.utils.toArray('.project-card');
-      gsap.to(projects, {
-        xPercent: -100 * (projects.length - 1),
-        ease: "none",
-        scrollTrigger: {
-          trigger: '.scene-6',
-          pin: true,
-          scrub: 1,
-          start: 'top top',
-          end: () => `+=${document.querySelector('.scene-6').offsetWidth}`
+    const spawn = () => {
+      const e = EDGES[Math.floor(Math.random() * EDGES.length)];
+      packets.push({ a: e[0], b: e[1], p: 0, sp: 0.0035 + Math.random() * 0.006 });
+    };
+    for (let i = 0; i < density * 2; i++) spawn();
+
+    const hexA = (hex, a) => {
+      const m = hex.replace('#', '');
+      const n = m.length === 3 ? m.split('').map((c) => c + c).join('') : m;
+      const r = parseInt(n.slice(0, 2), 16);
+      const g = parseInt(n.slice(2, 4), 16);
+      const b = parseInt(n.slice(4, 6), 16);
+      return `rgba(${r},${g},${b},${a})`;
+    };
+
+    let last = 0;
+    function render(t) {
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(233,233,237,0.032)';
+      ctx.lineWidth = 1;
+      const step = 56;
+      ctx.beginPath();
+      for (let x = (w % step) / 2; x < w; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = (h % step) / 2; y < h; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+
+      nodes.forEach((n, i) => {
+        const bx = n.x * w;
+        const by = n.y * h;
+        let tx = 0;
+        let ty = 0;
+        if (mouse.on) {
+          const dx = mouse.x - bx;
+          const dy = mouse.y - by;
+          const d = Math.hypot(dx, dy);
+          if (d < 320) {
+            const f = (1 - d / 320) * 16;
+            tx = (dx / (d || 1)) * f;
+            ty = (dy / (d || 1)) * f;
+          }
         }
+        const drift = reduce ? 0 : Math.sin(t / 2600 + i * 1.7) * 4;
+        n.ox += (tx - n.ox) * 0.06;
+        n.oy += (ty - n.oy) * 0.06;
+        n.px = bx + n.ox;
+        n.py = by + n.oy + drift;
+        n.pulse *= 0.94;
       });
-    });
 
-    mm.add("(max-width: 768px)", () => {
-      gsap.utils.toArray('.scene').forEach(scene => {
-        gsap.fromTo(scene,
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1, y: 0,
-            duration: 0.8,
-            scrollTrigger: {
-              trigger: scene,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse'
-            }
+      EDGES.forEach(([a, b]) => {
+        const A = nodes[a];
+        const B = nodes[b];
+        let alpha = 0.13;
+        if (mouse.on) {
+          const mx = (A.px + B.px) / 2;
+          const my = (A.py + B.py) / 2;
+          const d = Math.hypot(mouse.x - mx, mouse.y - my);
+          if (d < 240) alpha += (1 - d / 240) * 0.4;
+        }
+        ctx.strokeStyle = hexA(accent, alpha);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(A.px, A.py);
+        ctx.lineTo(B.px, B.py);
+        ctx.stroke();
+      });
+
+      if (mouse.on) {
+        const near = nodes
+          .map((n, i) => ({ i, d: Math.hypot(mouse.x - n.px, mouse.y - n.py) }))
+          .sort((p, q) => p.d - q.d)
+          .slice(0, 3);
+        near.forEach(({ i, d }) => {
+          if (d > 420) return;
+          ctx.strokeStyle = hexA(accent, 0.3 * (1 - d / 420));
+          ctx.setLineDash([3, 5]);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(nodes[i].px, nodes[i].py);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        });
+      }
+
+      if (!reduce) {
+        for (let i = packets.length - 1; i >= 0; i--) {
+          const pk = packets[i];
+          pk.p += pk.sp;
+          const A = nodes[pk.a];
+          const B = nodes[pk.b];
+          if (pk.p >= 1) {
+            nodes[pk.b].pulse = 1;
+            packets.splice(i, 1);
+            if (packets.length < density * 2) spawn();
+            continue;
           }
-        );
+          const x = A.px + (B.px - A.px) * pk.p;
+          const y = A.py + (B.py - A.py) * pk.p;
+          const tail = Math.max(0, pk.p - 0.1);
+          const tx = A.px + (B.px - A.px) * tail;
+          const ty = A.py + (B.py - A.py) * tail;
+          const g = ctx.createLinearGradient(tx, ty, x, y);
+          g.addColorStop(0, hexA(accent, 0));
+          g.addColorStop(1, hexA(accent, 0.9));
+          ctx.strokeStyle = g;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          ctx.fillStyle = hexA(accent, 0.95);
+          ctx.fillRect(x - 1.6, y - 1.6, 3.2, 3.2);
+        }
+      }
+
+      ctx.font = '500 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      nodes.forEach((n) => {
+        const hover = mouse.on && Math.hypot(mouse.x - n.px, mouse.y - n.py) < 90;
+        const size = n.kind === 'gate' ? 7 : n.kind === 'db' ? 8 : 5;
+        const boost = n.pulse * 0.5 + (hover ? 0.35 : 0);
+        ctx.strokeStyle = hexA(accent, 0.42 + boost);
+        ctx.fillStyle = 'rgba(22,24,38,0.92)';
+        ctx.lineWidth = 1.2;
+        if (n.kind === 'gate') {
+          ctx.beginPath();
+          ctx.arc(n.px, n.py, size + 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = hexA(accent, 0.18 + boost);
+          ctx.beginPath();
+          ctx.arc(n.px, n.py, size + 9 + n.pulse * 7, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (n.kind === 'db') {
+          ctx.beginPath();
+          ctx.rect(n.px - 13, n.py - 8, 26, 16);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(n.px - 13, n.py - 2);
+          ctx.lineTo(n.px + 13, n.py - 2);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.rect(n.px - size, n.py - size, size * 2, size * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+        ctx.fillStyle = hover || n.pulse > 0.25 ? hexA(accent, 0.95) : 'rgba(233,233,237,0.42)';
+        ctx.fillText(n.label, n.px, n.py + (n.kind === 'db' ? 24 : 20));
       });
+    }
 
-      gsap.utils.toArray('.info-block').forEach((block, i) => {
-        gsap.fromTo(block,
-          { opacity: 0, x: i % 2 === 0 ? -40 : 40 },
-          {
-            opacity: 1, x: 0,
-            scrollTrigger: {
-              trigger: block,
-              start: 'top 88%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
+    /* The pump: capped at ~30fps and idle while the hero is scrolled away, so
+       the graph costs nothing once the visitor is reading the projects. */
+    const draw = (t) => {
+      raf = requestAnimationFrame(draw);
+      if (!heroVisible || !w || !h || t - last < 32) return;
+      last = t;
+      render(t);
+    };
 
-      gsap.utils.toArray('.project-card').forEach(card => {
-        gsap.fromTo(card,
-          { opacity: 0, scale: 0.9 },
-          {
-            opacity: 1, scale: 1,
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 85%',
-              toggleActions: 'play none none reverse'
-            }
-          }
-        );
-      });
-    });
+    /* A ResizeObserver, not a window listener: the effect can run before the
+       canvas has been laid out, and a window-only listener would leave the
+       backing store at 0 until the visitor happened to resize. */
+    const ro = new ResizeObserver(resize);
+    ro.observe(cv);
+    resize();
 
-  }, { scope: containerRef });
+    let heroIo;
+    const hero = document.getElementById('hero');
+    if (hero && 'IntersectionObserver' in window) {
+      heroIo = new IntersectionObserver(([e]) => {
+        heroVisible = e.isIntersecting;
+      }, { threshold: 0.02 });
+      heroIo.observe(hero);
+    }
+    raf = requestAnimationFrame(draw);
 
-  const toggleLanguage = () => {
-    setLang(prev => prev === 'en' ? 'ar' : 'en');
-  };
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      parent.removeEventListener('mousemove', onMove);
+      parent.removeEventListener('mouseleave', onLeave);
+      if (heroIo) heroIo.disconnect();
+    };
+  }, [accent]);
 
+  return <canvas ref={canvasRef} className="hero-canvas" aria-hidden="true" />;
+}
+
+/* ── Architecture diagrams ───────────────────────────────────────────────
+   One per project, drawn from the real repository layout. */
+
+function PetzyArch({ t }) {
+  const mods = ['Security', 'Clinics', 'Pets', 'Appts', 'Shop', 'Chat', 'Bot', 'Calls'];
   return (
-    <div ref={containerRef} className={`app-container ${lang === 'ar' ? 'rtl-mode' : ''}`}>
-
-      <button className="lang-toggle-btn" onClick={toggleLanguage}>
-        {currentText.langBtn}
-      </button>
-
-      <section className="scene scene-1">
-        <div className="hero-box">
-          <img src={myProfileImg} alt="Youssef Ibrahim" className="profile-img" />
-          <div>
-            <h1 className="hero-title">{currentText.heroTitle}</h1>
-            <p className="hero-subtitle">{currentText.heroSubtitle}</p>
+    <>
+      <div className="arch-cols">
+        <div className="arch-stack">
+          <span className="node node-md">Flutter mobile client</span>
+          <span className="node node-md">AI service</span>
+          <span className="arrow">REST · JWT →</span>
+        </div>
+        <div className="host">
+          <span className="host-label">SINGLE API HOST</span>
+          <div className="mods mods-sm">
+            {mods.map((m) => (
+              <span className="mod" key={m}>{m}</span>
+            ))}
           </div>
+          <span className="node node-dash" style={{ fontSize: 9 }}>BUILDING BLOCKS — cross-cutting</span>
         </div>
-      </section>
-
-      <section className="scene scene-2">
-        <div className="content-box text-only">
-          <h2>{currentText.sec1Title}</h2>
-          <div className="info-block bio-block">
-            <h3>{currentText.objectiveTitle}</h3>
-            <p style={{ fontSize: '1.25rem', lineHeight: '1.7' }}>{currentText.objectiveDesc}</p>
-            <div className="bio-meta">
-              <span>LOC: Egypt</span>
-              <span>STATUS: Active_Dev</span>
-              <span>FIELD: Full_Stack_DotNet</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="scene scene-3">
-        <div className="content-box">
-          <h2>{currentText.skillsTitle}</h2>
-          <div className="profile-grid eight-cards">
-            <div className="info-block">
-              <h3>[CORE_LANGUAGES]</h3>
-              <div className="skills-tags"><span>C#</span><span>Python</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[CS_FOUNDATIONS]</h3>
-              <div className="skills-tags"><span>Data Structures</span><span>Algorithms</span><span>OOP</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[BACKEND_FRAMEWORKS]</h3>
-              <div className="skills-tags"><span>ASP.NET Core</span><span>Entity Framework Core</span><span>FastAPI</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[API_COMMUNICATION]</h3>
-              <div className="skills-tags"><span>RESTful APIs</span><span>WebSockets</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[FRONTEND_UI]</h3>
-              <div className="skills-tags"><span>Blazor</span><span>MudBlazor</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[CLOUD_PLATFORMS]</h3>
-              <div className="skills-tags"><span>Microsoft Azure</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[ARCHITECTURE_PRINCIPLES]</h3>
-              <div className="skills-tags"><span>Clean Architecture</span><span>SOLID Principles</span></div>
-            </div>
-            <div className="info-block">
-              <h3>[DATABASES]</h3>
-              <div className="skills-tags"><span>SQL Server</span><span>Schema Design</span><span>Query Optimization</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="scene scene-4">
-        <div className="content-box">
-          <h2>{currentText.sec2Title}</h2>
-          <div className="profile-grid">
-            <div className="info-block">
-              <h3>{currentText.expTitle}</h3>
-              <p className="highlight">{currentText.expCompany}</p>
-              <p style={{ color: '#64748b', fontSize: '0.95rem' }}>{currentText.expSub}</p>
-              <ul className="terminal-list">
-                <li>{currentText.expL1}</li>
-                <li>{currentText.expL2}</li>
-                <li>{currentText.expL3}</li>
-                <li>{currentText.expL4}</li>
-                <li>{currentText.expL5}</li>
-                <li>{currentText.expL6}</li>
-                <li>{currentText.expL7}</li>
-                <li>{currentText.expL8}</li>
-                <li>{currentText.expL9}</li>
-              </ul>
-            </div>
-            <div className="info-block">
-              <h3>{currentText.trainTitle}</h3>
-              <p className="highlight">{currentText.trainCompany}</p>
-              <p style={{ color: '#64748b', fontSize: '0.95rem' }}>{currentText.trainSub}</p>
-              <ul className="terminal-list">
-                <li>{currentText.trainL1}</li>
-                <li>{currentText.trainL2}</li>
-                <li>{currentText.trainL3}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="scene scene-5">
-        <div className="content-box">
-          <h2>{currentText.sec3Title}</h2>
-          <div className="profile-grid">
-            <div className="info-block">
-              <h3>{currentText.eduTitle}</h3>
-              <p className="highlight">{currentText.eduCompany}</p>
-              <p>{currentText.eduSub}</p>
-              <p style={{ marginTop: '10px', color: '#38bdf8', fontSize: '0.9rem' }}>{currentText.eduCourse}</p>
-            </div>
-            <div className="info-block">
-              <h3>{currentText.leadTitle}</h3>
-              <p className="highlight">{currentText.leadCompany}</p>
-              <p style={{ color: '#64748b', fontSize: '0.95rem' }}>{currentText.leadSub}</p>
-              <ul className="terminal-list">
-                <li>{currentText.leadL1}</li>
-                <li>{currentText.leadL2}</li>
-                <li>{currentText.leadL3}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="scene scene-6">
-        <div className="projects-wrapper">
-          <a href={currentText.projLink1} target="_blank" rel="noopener noreferrer" className="project-card">
-            <h3>{currentText.projTitle1}</h3>
-            <p>{currentText.projDesc1}</p>
-            <div className="card-tech">.NET Core / EF Core / AI Integration</div>
-            <span>{currentText.projTag1}</span>
-          </a>
-          <a href={currentText.projLink2} target="_blank" rel="noopener noreferrer" className="project-card">
-            <h3>{currentText.projTitle2}</h3>
-            <p>{currentText.projDesc2}</p>
-            <div className="card-tech">ASP.NET Core API / Blazor / SQL Server</div>
-            <span>{currentText.projTag2}</span>
-          </a>
-          <a href={currentText.projLink3} target="_blank" rel="noopener noreferrer" className="project-card">
-            <h3>{currentText.projTitle3}</h3>
-            <p>{currentText.projDesc3}</p>
-            <div className="card-tech">ASP.NET Core MVC / SQL Server</div>
-            <span>{currentText.projTag3}</span>
-          </a>
-        </div>
-      </section>
-
-      <div className="mac-dock-container">
-        <div className="mac-dock">
-          <a href="https://github.com/YoussefIbrahim13" target="_blank" rel="noopener noreferrer" className="dock-item" title="GitHub">
-            <svg viewBox="0 0 24 24" className="dock-icon"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.42 1.08 3 1 .09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69 1 .69 2.21v3.29c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
-          </a>
-          <div className="dock-separator"></div>
-          <a href="https://www.linkedin.com/in/youssef-ibrahim-1322004sh192007" target="_blank" rel="noopener noreferrer" className="dock-item" title="LinkedIn">
-            <svg viewBox="0 0 24 24" className="dock-icon"><path fill="currentColor" d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-          </a>
+        <div className="arch-stack">
+          <span className="arrow">→ EF Core 8</span>
+          <span className="node node-md node-accent">
+            SQL Server
+            <span className="node-sub">one database · DbContext per module</span>
+          </span>
+          <span className="node node-md">
+            SignalR
+            <span className="node-sub">chat · chatbot</span>
+          </span>
+          <span className="node node-md">
+            Azure Communication
+            <span className="node-sub">video calls</span>
+          </span>
         </div>
       </div>
-
-    </div>
+      <p className="arch-note">{t.note}</p>
+    </>
   );
 }
 
-export default App;
+function PeerCarArch({ t }) {
+  return (
+    <>
+      <div className="arch-flow">
+        <span className="node node-accent">PRESENTATION — MVC · SignalR hub</span>
+        <span className="arrow">↓</span>
+        <span className="node">APPLICATION — use cases · DTOs</span>
+        <span className="arrow">↓</span>
+        <span className="node node-dash">DOMAIN — entities · rental state machine</span>
+        <span className="arrow">↑</span>
+        <span className="node">INFRASTRUCTURE — EF Core · generic repo</span>
+      </div>
+      <div className="grid2" style={{ marginTop: 2 }}>
+        <span className="cell">Worker · auto-complete finished bookings</span>
+        <span className="cell">Worker · cancel expired bookings</span>
+        <span className="cell">Identity · Google OAuth · RBAC</span>
+        <span className="cell">Soft delete flags · GUID keys</span>
+      </div>
+      <p className="arch-note">{t.note}</p>
+    </>
+  );
+}
+
+function AttendanceArch({ t }) {
+  return (
+    <>
+      <span className="node">Blazor WebAssembly clients — Auth · Import</span>
+      <span className="arrow">↓ JWT bearer</span>
+      <div className="host">
+        <span className="host-label">.NET ASPIRE APPHOST</span>
+        <div className="grid2" style={{ fontSize: 10 }}>
+          <span className="cell">Auth API</span>
+          <span className="cell">File-Import API</span>
+        </div>
+        <span className="node node-dash" style={{ fontSize: 9 }}>CQRS · MediatR commands / queries</span>
+      </div>
+      <div className="grid3">
+        <span className="cell">CSV import + validation</span>
+        <span className="cell">Working-hours calc</span>
+        <span className="cell">Daily / monthly / yearly views</span>
+      </div>
+      <span className="node node-accent">SQL Server</span>
+      <p className="arch-note">{t.note}</p>
+    </>
+  );
+}
+
+function BedoonHabdArch({ t }) {
+  return (
+    <>
+      <span className="node">Flutter judge app · Arabic-first RTL</span>
+      <span className="arrow arrow-sm">↓ REST + WS /ws/game/&#123;room&#125;</span>
+      <div className="host host-alt">
+        <span className="host-label-alt">FASTAPI SERVICE</span>
+        <span className="node node-dash-ac" style={{ borderStyle: 'dashed' }}>Keyword classifier (ar + en)</span>
+        <div className="grid2">
+          <span className="cell">Objective → Llama 3.3 over country fact sheet</span>
+          <span className="cell">General → compound + live web search</span>
+        </div>
+      </div>
+      <div className="grid3">
+        <span className="cell">LRU verdict cache</span>
+        <span className="cell">Rate limit 20/min per IP</span>
+        <span className="cell">Global budget 60/min</span>
+      </div>
+      <span className="node node-accent" style={{ fontSize: 9.5 }}>
+        194 countries — merged from 3 keyless sources, cached for offline restarts
+      </span>
+      <p className="arch-note">{t.note}</p>
+    </>
+  );
+}
+
+function AwradiArch({ t }) {
+  return (
+    <>
+      <span className="node node-accent-2">FLUTTER UI — offline-first, no server</span>
+      <span className="arrow arrow-sm">↓ Riverpod providers</span>
+      <div className="grid2" style={{ fontSize: 9.5 }}>
+        <span className="cell cell-tall cell-accent">
+          Drift / SQLite
+          <span className="cell-sub">daily progress · khatmah</span>
+        </span>
+        <span className="cell cell-tall">
+          Notification scheduler
+          <span className="cell-sub">tz-aware reminder ids</span>
+        </span>
+      </div>
+      <div className="grid2">
+        <span className="cell">Offline Quran pack — zip download, SHA-256 verify, extract</span>
+        <span className="cell">Qibla — sensors + geolocation math</span>
+      </div>
+      <span className="node node-dash-ac" style={{ fontSize: 9.5 }}>
+        Unit-tested domain: progress, khatmah, notification ids, qibla math
+      </span>
+      <p className="arch-note">{t.note}</p>
+    </>
+  );
+}
+
+function RecruitBotArch({ t }) {
+  const layers = [
+    'Domain blacklist — zombie aggregators',
+    'Content pollution — forums, Q&A, blogs',
+    'Path gate — canonical listing URLs only',
+    'Staleness scan — age badges, ar + en',
+    'Live probe — 8KB head fetch',
+  ];
+  return (
+    <>
+      <div className="arch-cols">
+        <div className="arch-stack">
+          <span className="node node-md">
+            CV upload — PDF / DOCX / TXT
+            <span className="node-sub">size guard · magic bytes</span>
+          </span>
+          <span className="node node-md">Targeted search — title + location</span>
+          <span className="arrow">FastAPI →</span>
+        </div>
+        <div className="host host-alt">
+          <span className="host-label-alt">LANGGRAPH STATE MACHINE</span>
+          <div className="grid2">
+            <span className="cell">llm_node — Groq Llama 3.3 70B</span>
+            <span className="cell">tool_node — Tavily + scrape</span>
+            <span className="cell">coerce_internship_node</span>
+            <span className="cell">graceful_exit_node</span>
+          </div>
+          <span className="node node-dash-ac" style={{ fontSize: 9 }}>
+            2 parallel Tavily queries per turn · 11 approved boards
+          </span>
+        </div>
+        <div className="arch-stack">
+          <span className="arrow">→ 5-LAYER FILTER</span>
+          <div className="arch-flow" style={{ fontSize: 9 }}>
+            {layers.map((l, i) => (
+              <span className="node" key={l} style={{ padding: '6px 5px', letterSpacing: 'normal' }}>
+                {i + 1}. {l}
+              </span>
+            ))}
+          </div>
+          <span className="node node-md node-accent" style={{ fontSize: 9.5 }}>
+            Match score 0–100
+            <span className="node-sub">title 50 · location 30 · info 20</span>
+          </span>
+        </div>
+      </div>
+      <p className="arch-note">{t.note}</p>
+    </>
+  );
+}
+
+const ARCH = {
+  petzy: PetzyArch,
+  peercar: PeerCarArch,
+  attendance: AttendanceArch,
+  bedoonhabd: BedoonHabdArch,
+  awradi: AwradiArch,
+  recruitbot: RecruitBotArch,
+};
+
+/* ── Project card ────────────────────────────────────────────────────────
+   Front is the pitch, back is the architecture. The whole card is the flip
+   control, so it carries button semantics and an Enter/Space handler; the
+   GitHub link on the back stops propagation so it doesn't flip back. */
+function ProjectCard({ project, lang, t, flipped, onFlip }) {
+  const copy = project[lang];
+  const Arch = ARCH[project.id];
+  const cardRef = useRef(null);
+  // Reduced motion opts out of the reveal entirely — start visible rather than
+  // fading in, so no effect has to correct the state after the first render.
+  const [revealed, setRevealed] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || revealed) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setRevealed(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px' },
+    );
+    io.observe(el);
+    // Safety net: never leave a card stuck invisible if the observer misses it.
+    const fallback = setTimeout(() => setRevealed(true), 4000);
+    return () => {
+      io.disconnect();
+      clearTimeout(fallback);
+    };
+  }, [revealed]);
+
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onFlip();
+    }
+  };
+
+  const tagClass = project.alt ? 'tech-tag-alt' : 'tech-tag';
+
+  return (
+    <article
+      ref={cardRef}
+      role="button"
+      tabIndex={0}
+      aria-pressed={flipped}
+      aria-label={`${project.title} — ${t.seeArch}`}
+      onClick={onFlip}
+      onKeyDown={onKeyDown}
+      className={[
+        'card',
+        project.wide ? 'card-wide' : '',
+        'reveal',
+        revealed ? 'is-in' : '',
+        flipped ? 'is-flipped' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <div className="card-inner">
+        <div className="face face-front">
+          <div className="card-col">
+            <div className="card-head">
+              <span className="card-num">{project.num}</span>
+              <span className="card-tag">{copy.tag}</span>
+            </div>
+            <h3 className={`card-title${project.titleSmall ? ' card-title-sm' : ''}`}>{project.title}</h3>
+            <p className="card-sub">{copy.sub}</p>
+            <p className="card-desc">{copy.desc}</p>
+            <div className="tech">
+              {project.tech.map((tag) => (
+                <span className={tagClass} key={tag}>{tag}</span>
+              ))}
+            </div>
+            <span className="see-arch">
+              <span className="see-arch-icon" aria-hidden="true">⤿</span>
+              {t.seeArch}
+            </span>
+          </div>
+          {project.id === 'petzy' && (
+            <div className="wide-side">
+              <p className="wide-side-label">8 BOUNDED MODULES</p>
+              <div className="mods">
+                {['Security', 'Clinics', 'Pets', 'Appointments', 'E-commerce', 'Chat', 'Chatbot', 'Video Calls'].map((m) => (
+                  <span className={`mod${m === 'Appointments' ? ' mod-lit' : ''}`} key={m}>{m}</span>
+                ))}
+              </div>
+              <p className="wide-side-foot">↳ Building Blocks · one API host · Stripe inside E-commerce</p>
+            </div>
+          )}
+          {project.id === 'recruitbot' && (
+            <div className="wide-side">
+              <p className="wide-side-label">5-LAYER QUALITY PIPELINE</p>
+              <div className="arch-flow">
+                <span className="node node-accent-2">Tavily results in</span>
+                <span className="arrow">↓</span>
+                <span className="node">Blacklist → pollution → path gate</span>
+                <span className="arrow">↓</span>
+                <span className="node">Staleness scan (ar + en)</span>
+                <span className="arrow">↓</span>
+                <span className="node node-dash-ac">Live 8KB probe — closure badges</span>
+              </div>
+              <p className="wide-side-foot">↳ only validated, currently-open listings survive</p>
+            </div>
+          )}
+        </div>
+
+        <div className={`face face-back${project.alt ? ' face-back-alt' : ''}`}>
+          <div className="arch-head">
+            <span className={project.alt ? 'arch-id-alt' : 'arch-id'}>{project.archId}</span>
+            {project.id === 'petzy' && <span>{t.archLabel}</span>}
+            <span className="spacer" />
+            <a
+              href={project.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="arch-link"
+              onClick={(e) => e.stopPropagation()}
+            >
+              github ↗
+            </a>
+          </div>
+          <Arch t={copy} />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ── Page ────────────────────────────────────────────────────────────── */
+
+export default function App() {
+  const [lang, setLang] = useState('en');
+  const [flipped, setFlipped] = useState({});
+  const t = TEXT[lang];
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = t.dir;
+  }, [lang, t.dir]);
+
+  const toggleFlip = useCallback((id) => {
+    setFlipped((s) => ({ ...s, [id]: !s[id] }));
+  }, []);
+
+  return (
+    <div className="page" dir={t.dir}>
+      <nav className="nav">
+        <a href="#hero" className="nav-brand">
+          <span className="nav-mark" aria-hidden="true" />
+          YI
+        </a>
+        <span className="nav-spacer" />
+        <div className="nav-actions">
+          <a href="#projects" className="nav-link">{t.navProjects}</a>
+          <a href={`mailto:${EMAIL}`} className="nav-link">{t.navContact}</a>
+          <button type="button" className="nav-btn" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
+            {t.langBtn}
+          </button>
+          <a href={CV_URL} target="_blank" rel="noopener noreferrer" className="nav-cta">{t.resume}</a>
+        </div>
+      </nav>
+
+      <section id="hero" className="hero">
+        <HeroGraph accent={ACCENT} />
+        <div className="hero-veil" />
+
+        <div className="hero-inner">
+          <div className="hero-content">
+            <p className="prompt">
+              <span className="prompt-host">youssef@backend:~$</span>
+              {t.whoami}
+              <span className="caret" aria-hidden="true" />
+            </p>
+            <h1 className="hero-name">{t.name}</h1>
+            <p className="hero-role">{t.role}</p>
+            <p className="hero-summary">{t.summary}</p>
+            <div className="chips">
+              <span className="chip">{t.chipLoc}</span>
+              <span className="chip">.NET 8 · EF CORE 8</span>
+              <span className="chip">CLEAN ARCH · CQRS</span>
+              <span className="chip">SQL SERVER</span>
+            </div>
+            <div className="btn-row">
+              <a href="#projects" className="btn-accent">
+                {t.ctaProjects}
+                <span className="glyph" aria-hidden="true">↓</span>
+              </a>
+              <a href={CV_URL} target="_blank" rel="noopener noreferrer" className="btn-quiet">{t.ctaCv}</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="pipeline">
+          <div className="pipeline-rail">
+            <span className="pipeline-dot" aria-hidden="true" />
+          </div>
+          <div className="pipeline-row">
+            <span className="pipe-endpoint">GET /api/appointments/available</span>
+            <span className="pipe-arrow">→</span>
+            {['KESTREL', 'MIDDLEWARE · JWT', 'CONTROLLER', 'APPLICATION SERVICE', 'EF CORE', 'SQL SERVER'].map((stage, i) => (
+              <span key={stage} style={{ display: 'contents' }}>
+                <span className="pipe-stage" style={{ animationDelay: `${0.15 + i * 0.6}s` }}>{stage}</span>
+                {i < 5 && <span className="pipe-arrow">→</span>}
+              </span>
+            ))}
+            <span className="pipe-gap" />
+            <span className="pipe-status">200 OK · 41 ms</span>
+          </div>
+        </div>
+
+        <span className="scrollhint">{t.scroll}</span>
+      </section>
+
+      <section id="projects" className="projects">
+        <div className="projects-inner">
+          <p className="kicker">02 // {t.projectsKicker}</p>
+          <h2 className="section-title">{t.projectsTitle}</h2>
+          <p className="section-intro">{t.projectsIntro}</p>
+          <p className="flip-hint">{t.flipHint}</p>
+
+          <div className="grid">
+            {PROJECTS.map((p) => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                lang={lang}
+                t={t}
+                flipped={!!flipped[p.id]}
+                onFlip={() => toggleFlip(p.id)}
+              />
+            ))}
+          </div>
+
+          <div className="footer">
+            <p className="footer-note">{t.moreOnGithub}</p>
+            <span className="footer-spacer" />
+            <div className="social">
+              <a href={GITHUB_USER} target="_blank" rel="noopener noreferrer" className="social-link" title="GitHub" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.42 1.08 3 1 .09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69 1 .69 2.21v3.29c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" /></svg>
+              </a>
+              <a href={LINKEDIN} target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" /></svg>
+              </a>
+              <a href={`mailto:${EMAIL}`} className="social-link" title={EMAIL} aria-label="Email">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4.24-8 4.76-8-4.76V6l8 4.75L20 6v2.24z" /></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Analytics />
+    </div>
+  );
+}
