@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import mePhoto from './assets/me.jpg';
 
@@ -969,10 +969,10 @@ export default function App() {
             <span className="pipe-endpoint">GET /api/{'{resource}'}</span>
             <span className="pipe-arrow">{arrow}</span>
             {PIPELINE.map((stage, i) => (
-              <span key={stage} style={{ display: 'contents' }}>
+              <Fragment key={stage}>
                 <span className="pipe-stage" style={{ animationDelay: `${0.15 + i * 0.6}s` }}>{stage}</span>
                 {i < PIPELINE.length - 1 && <span className="pipe-arrow">{arrow}</span>}
-              </span>
+              </Fragment>
             ))}
             <span className="pipe-gap" />
             <span className="pipe-status">200 OK · JSON</span>

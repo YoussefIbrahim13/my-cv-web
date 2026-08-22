@@ -13,7 +13,11 @@
   --shell: 1240px;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* iOS inflates text in landscape without this. */
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   margin: 0;
@@ -94,7 +98,12 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 
 .hero {
-  position: sticky; top: 0; height: 100vh; min-height: 620px;
+  position: sticky; top: 0;
+  /* dvh, not vh: on iOS the address bar is inside 100vh, so a vh-sized hero
+     puts the pipeline strip underneath the browser chrome. vh stays first as
+     the fallback for engines without dynamic viewport units. */
+  height: 100vh; height: 100dvh;
+  min-height: 620px;
   overflow: hidden; display: flex; align-items: center;
   /* Reserve the fixed nav and the pipeline strip so the centred content is
      centred in the space actually left over, instead of behind the nav bar.
@@ -513,10 +522,34 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .face-back { position: absolute; inset: 0; height: 100%; }
   .card.is-flipped .face-front { visibility: hidden; }
   .hero { min-height: 560px; }
-  .pipeline-row { font-size: 9.5px; gap: 6px; }
+
   /* The four actions can't fit one row on a phone and were wrapping the fixed
      header to ~140px, covering the hero. The page is only two sections, so the
      jump links go and the portrait, language toggle and CV stay. */
   .nav { gap: var(--space-3); }
   .nav-link { display: none; }
+  /* Comfortable thumb targets. The portrait can't grow its hit area with a
+     pseudo-element because it clips its own overflow, so it grows outright. */
+  .nav-btn, .nav-cta { padding: 12px 14px; }
+  .avatar { width: 40px; height: 40px; }
+
+  /* The hero text runs the full width on a phone, so it sits right on top of
+     the service graph — node labels read straight through the paragraph. The
+     graph is decoration; legibility wins, and dropping it also spares the
+     battery a permanent animation loop. */
+  .hero-canvas, .hero-veil { display: none; }
+
+  /* Wrapping turned the request trace into a four-row block that ate the
+     screen. One swipeable line keeps it a trace. */
+  .pipeline-row {
+    font-size: 9.5px; gap: 6px;
+    flex-wrap: nowrap; overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .pipeline-row::-webkit-scrollbar { display: none; }
+  /* flex:none or the chips shrink and wrap their own text, which puts the
+     "single line" back onto three. */
+  .pipeline-row > * { flex: none; white-space: nowrap; }
+  .pipe-gap { display: none; }
 }
