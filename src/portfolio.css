@@ -11,6 +11,9 @@
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --gutter: clamp(20px, 4vw, 44px);
   --shell: 1240px;
+  /* Height the fixed nav occupies, plus a little air. The hero reserves this
+     as padding, so the two must move together — keep them on one variable. */
+  --nav-h: 68px;
 }
 
 html {
@@ -109,7 +112,7 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
      centred in the space actually left over, instead of behind the nav bar.
      The canvas and pipeline are absolutely positioned, so they still bleed to
      the full edge — only the text column is inset. */
-  padding-top: 68px; padding-bottom: 92px;
+  padding-top: var(--nav-h); padding-bottom: 92px;
 }
 .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .hero-veil {
@@ -514,6 +517,8 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 }
 
 @media (max-width: 620px) {
+  /* The larger thumb targets below push the nav to ~77px. */
+  :root { --nav-h: 88px; }
   .grid { grid-template-columns: minmax(0, 1fr); }
   .card, .card-wide { height: auto; min-height: 560px; }
   .card-inner { min-height: inherit; }
@@ -533,11 +538,29 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .nav-btn, .nav-cta { padding: 12px 14px; }
   .avatar { width: 40px; height: 40px; }
 
-  /* The hero text runs the full width on a phone, so it sits right on top of
-     the service graph — node labels read straight through the paragraph. The
-     graph is decoration; legibility wins, and dropping it also spares the
-     battery a permanent animation loop. */
-  .hero-canvas, .hero-veil { display: none; }
+  /* The hero text runs the full width on a phone, so a full-bleed graph sits
+     right under the paragraph and its labels read through the copy. Rather
+     than drop it, give it its own band below the text: the hero becomes a
+     column, the canvas joins the flow, and the graph switches to its
+     full-width layout. It stays touch-interactive down here. */
+  .hero {
+    position: relative;
+    height: auto; min-height: 100dvh;
+    flex-direction: column; justify-content: center;
+    padding-bottom: var(--space-8);
+  }
+  .hero-inner { order: 1; }
+  .hero-canvas {
+    order: 2; position: static;
+    width: 100%; height: 260px;
+    margin-top: var(--space-6);
+    pointer-events: auto;
+    /* Let vertical swipes scroll the page; the graph reacts as they pass. */
+    touch-action: pan-y;
+  }
+  .hero-veil { display: none; }
+  .pipeline { order: 3; position: static; margin-top: var(--space-6); }
+  .scrollhint { display: none; }
 
   /* Wrapping turned the request trace into a four-row block that ate the
      screen. One swipeable line keeps it a trace. */

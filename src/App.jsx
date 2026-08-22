@@ -73,18 +73,23 @@ const TEXT = {
 
    Laid out as the request actually travels: entry at the top, the database as
    the sink at the bottom, off-request-path concerns (workers, real-time, AI) to
-   the sides. */
+   the sides.
+
+   x/y place the node on the desktop hero, where the graph is a full-bleed
+   backdrop and has to stay clear of the text column on the left. mx/my are the
+   phone layout, where the graph gets its own short, full-width band under the
+   copy and can therefore spread across the whole canvas. */
 const NODES = [
-  { id: 'api', label: 'API', x: 0.56, y: 0.10, kind: 'gate' },
-  { id: 'auth', label: 'Auth · JWT', x: 0.79, y: 0.09, kind: 'svc' },
-  { id: 'controllers', label: 'Controllers', x: 0.90, y: 0.23, kind: 'svc' },
-  { id: 'cqrs', label: 'CQRS', x: 0.70, y: 0.29, kind: 'svc' },
-  { id: 'domain', label: 'Domain', x: 0.58, y: 0.45, kind: 'svc' },
-  { id: 'cache', label: 'Cache', x: 0.87, y: 0.44, kind: 'svc' },
-  { id: 'realtime', label: 'Real-time', x: 0.76, y: 0.62, kind: 'svc' },
-  { id: 'workers', label: 'Workers', x: 0.56, y: 0.68, kind: 'svc' },
-  { id: 'ai', label: 'AI Services', x: 0.90, y: 0.75, kind: 'svc' },
-  { id: 'sql', label: 'SQL Server', x: 0.70, y: 0.89, kind: 'db' },
+  { id: 'api', label: 'API', x: 0.56, y: 0.10, mx: 0.10, my: 0.16, kind: 'gate' },
+  { id: 'auth', label: 'Auth · JWT', x: 0.79, y: 0.09, mx: 0.36, my: 0.10, kind: 'svc' },
+  { id: 'controllers', label: 'Controllers', x: 0.90, y: 0.23, mx: 0.68, my: 0.14, kind: 'svc' },
+  { id: 'cqrs', label: 'CQRS', x: 0.70, y: 0.29, mx: 0.30, my: 0.42, kind: 'svc' },
+  { id: 'domain', label: 'Domain', x: 0.58, y: 0.45, mx: 0.55, my: 0.46, kind: 'svc' },
+  { id: 'cache', label: 'Cache', x: 0.87, y: 0.44, mx: 0.90, my: 0.34, kind: 'svc' },
+  { id: 'realtime', label: 'Real-time', x: 0.76, y: 0.62, mx: 0.80, my: 0.60, kind: 'svc' },
+  { id: 'workers', label: 'Workers', x: 0.56, y: 0.68, mx: 0.12, my: 0.66, kind: 'svc' },
+  { id: 'ai', label: 'AI Services', x: 0.90, y: 0.75, mx: 0.85, my: 0.86, kind: 'svc' },
+  { id: 'sql', label: 'SQL Server', x: 0.70, y: 0.89, mx: 0.45, my: 0.80, kind: 'db' },
 ];
 
 /* Every edge is a real dependency, written upstream → downstream so the packets
@@ -318,6 +323,7 @@ function HeroGraph({ accent }) {
     let w = 0;
     let h = 0;
     let raf = 0;
+    let compact = false;
     let heroVisible = true;
     const mouse = { x: -9999, y: -9999, on: false };
     const nodes = NODES.map((n) => ({ ...n, ox: 0, oy: 0, px: 0, py: 0, pulse: 0 }));
@@ -332,9 +338,15 @@ function HeroGraph({ accent }) {
       cv.width = Math.round(w * dpr);
       cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      /* Below the phone breakpoint the graph is an in-flow band rather than a
+         backdrop, so it uses the full-width layout instead of hugging the
+         right. Re-read on every resize so a rotation switches layouts. */
+      compact = w < 620;
       nodes.forEach((n) => {
-        n.px = n.x * w;
-        n.py = n.y * h;
+        n.cx = compact ? n.mx : n.x;
+        n.cy = compact ? n.my : n.y;
+        n.px = n.cx * w;
+        n.py = n.cy * h;
       });
       // Paint one frame straight away so the graph is never blank between
       // layout and the first animation frame (which a background tab defers).
@@ -354,6 +366,45 @@ function HeroGraph({ accent }) {
     };
     parent.addEventListener('mousemove', onMove);
     parent.addEventListener('mouseleave', onLeave);
+
+    /* Touch equivalents, bound to the canvas itself rather than the hero, so a
+       finger anywhere else on the page doesn't drag the graph around. Nothing
+       calls preventDefault — the page must still scroll normally under the
+       finger; the graph just reacts while it passes. */
+    const touchAt = (e) => {
+      const t0 = e.touches[0];
+      if (!t0) return;
+      const r = cv.getBoundingClientRect();
+      mouse.x = t0.clientX - r.left;
+      mouse.y = t0.clientY - r.top;
+      mouse.on = true;
+    };
+    const onTouchStart = (e) => {
+      touchAt(e);
+      // A tap pulses the nearest node and pushes packets out along its edges.
+      let best = -1;
+      let bestD = Infinity;
+      nodes.forEach((n, i) => {
+        const d = Math.hypot(mouse.x - n.px, mouse.y - n.py);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      if (best >= 0 && bestD < 120) {
+        nodes[best].pulse = 1;
+        EDGES.filter(([a, b]) => a === best || b === best)
+          .slice(0, 3)
+          .forEach(([a, b]) => packets.push({
+            a: a === best ? a : b,
+            b: a === best ? b : a,
+            p: 0,
+            sp: 0.006 + Math.random() * 0.004,
+          }));
+      }
+    };
+    const onTouchEnd = () => { mouse.on = false; mouse.x = -9999; mouse.y = -9999; };
+    cv.addEventListener('touchstart', onTouchStart, { passive: true });
+    cv.addEventListener('touchmove', touchAt, { passive: true });
+    cv.addEventListener('touchend', onTouchEnd, { passive: true });
+    cv.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
     const spawn = () => {
       const e = EDGES[Math.floor(Math.random() * EDGES.length)];
@@ -389,8 +440,8 @@ function HeroGraph({ accent }) {
       ctx.stroke();
 
       nodes.forEach((n, i) => {
-        const bx = n.x * w;
-        const by = n.y * h;
+        const bx = n.cx * w;
+        const by = n.cy * h;
         let tx = 0;
         let ty = 0;
         if (mouse.on) {
@@ -553,6 +604,10 @@ function HeroGraph({ accent }) {
       ro.disconnect();
       parent.removeEventListener('mousemove', onMove);
       parent.removeEventListener('mouseleave', onLeave);
+      cv.removeEventListener('touchstart', onTouchStart);
+      cv.removeEventListener('touchmove', touchAt);
+      cv.removeEventListener('touchend', onTouchEnd);
+      cv.removeEventListener('touchcancel', onTouchEnd);
       if (heroIo) heroIo.disconnect();
     };
   }, [accent]);
