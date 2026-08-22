@@ -114,17 +114,18 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 }
 .hero-content { max-width: 640px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6); }
 
-/* Portrait. The source is a bright full-body outdoor shot, so it gets a tight
-   head-and-shoulders crop in CSS (the file stays untouched) and is grounded
-   with an edge and ambient darkness rather than the system's .lighten wrapper —
-   .lighten only dissolves values darker than the page, and nothing in a sunny
-   photo is. Crop box in source pixels: 210x210 at (247,161) of 726x968 —
-   head and shoulders, eyes about 40% down the circle. */
+/* Portrait. The source is a bright full-body outdoor shot, so the thumbnail is
+   a tight head-and-shoulders crop done in CSS (the file stays untouched) and is
+   grounded with an edge and ambient darkness rather than the system's .lighten
+   wrapper — .lighten only dissolves values darker than the page, and nothing in
+   a sunny photo is. Crop box in source pixels: 210x210 at (247,161) of 726x968,
+   which puts the eyes about 40% down the circle. */
 .avatar {
-  position: relative; flex: none;
-  width: 92px; height: 92px; border-radius: 50%; overflow: hidden;
+  position: relative; flex: none; display: block;
+  width: 30px; height: 30px; border-radius: 50%; overflow: hidden;
+  padding: 0; background: none; cursor: pointer;
   border: 1px solid color-mix(in srgb, var(--ac) 38%, transparent);
-  box-shadow: 0 0 30px -10px color-mix(in srgb, var(--ac) 50%, transparent);
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 .avatar img {
   position: absolute;
@@ -141,6 +142,54 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   background: radial-gradient(circle at 50% 38%,
     transparent 42%,
     color-mix(in srgb, var(--color-bg) 60%, transparent) 100%);
+}
+.avatar:hover {
+  border-color: var(--ac);
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--ac) 65%, transparent);
+}
+.avatar:hover img { filter: saturate(1) contrast(1.03) brightness(1.05); }
+
+/* ── Portrait lightbox ─────────────────────────────────────────────────── */
+
+.lightbox {
+  border: none; padding: 0; background: none; overflow: visible;
+  max-width: min(92vw, 520px); max-height: 92vh;
+  color: var(--color-text);
+}
+.lightbox::backdrop {
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(6px);
+}
+.lightbox-frame {
+  margin: 0; position: relative;
+  border: 1px solid color-mix(in srgb, var(--ac) 30%, transparent);
+  border-radius: var(--radius-lg); overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .7);
+}
+.lightbox-frame img {
+  display: block; width: 100%; height: auto;
+  max-height: 78vh; object-fit: contain;
+}
+.lightbox-caption {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; border-top: 1px solid var(--color-divider);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.lightbox-caption .dot { width: 6px; height: 6px; border-radius: 2px; background: var(--ac); flex: none; }
+.lightbox-close {
+  position: absolute; top: 10px; inset-inline-end: 10px;
+  width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px; line-height: 1; cursor: pointer;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+.lightbox-close:hover {
+  color: var(--ac); border-color: color-mix(in srgb, var(--ac) 55%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 90%, transparent);
 }
 
 .prompt {
@@ -459,7 +508,10 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .face-back { position: absolute; inset: 0; height: 100%; }
   .card.is-flipped .face-front { visibility: hidden; }
   .hero { min-height: 560px; }
-  .avatar { width: 72px; height: 72px; }
   .pipeline-row { font-size: 9.5px; gap: 6px; }
-  .nav-link { padding: 7px 6px; }
+  /* The four actions can't fit one row on a phone and were wrapping the fixed
+     header to ~140px, covering the hero. The page is only two sections, so the
+     jump links go and the portrait, language toggle and CV stay. */
+  .nav { gap: var(--space-3); }
+  .nav-link { display: none; }
 }

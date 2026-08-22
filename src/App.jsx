@@ -34,6 +34,9 @@ const TEXT = {
     seeArch: 'SEE ARCHITECTURE',
     archLabel: 'MODULE MAP',
     moreOnGithub: 'MORE ON GITHUB — 20+ REPOSITORIES',
+    portraitOpen: 'View photo',
+    portraitCaption: 'YOUSSEF IBRAHIM — GRADUATION, COMPUTER SCIENCE',
+    close: 'Close',
   },
   ar: {
     dir: 'rtl',
@@ -58,6 +61,9 @@ const TEXT = {
     seeArch: 'اعرض المعمارية',
     archLabel: 'خريطة الوحدات',
     moreOnGithub: 'المزيد على GITHUB — أكثر من ٢٠ مستودعًا',
+    portraitOpen: 'عرض الصورة',
+    portraitCaption: 'يوسف إبراهيم — التخرّج، علوم الحاسب',
+    close: 'إغلاق',
   },
 };
 
@@ -209,6 +215,45 @@ const PROJECTS = [
     },
   },
 ];
+
+/* ── Portrait ────────────────────────────────────────────────────────────
+   A cropped thumbnail in the nav that opens the full photograph. Built on the
+   native <dialog>, so Escape-to-close, focus trapping and the inert background
+   come from the platform rather than being re-implemented here. */
+function Portrait({ t }) {
+  const dialogRef = useRef(null);
+
+  const open = () => dialogRef.current?.showModal();
+  const close = () => dialogRef.current?.close();
+
+  return (
+    <>
+      <button type="button" className="avatar" onClick={open} title={t.portraitOpen} aria-label={t.portraitOpen}>
+        <img src={mePhoto} alt="" width="30" height="30" />
+      </button>
+      <dialog
+        ref={dialogRef}
+        className="lightbox"
+        aria-label={t.name}
+        /* Clicking the backdrop targets the dialog element itself. */
+        onClick={(e) => { if (e.target === dialogRef.current) close(); }}
+        /* <dialog> closes on Escape on its own, but that path depends on the
+           browser issuing a close request. Handling the key directly makes the
+           behaviour unconditional; a second close() on a shut dialog is a no-op. */
+        onKeyDown={(e) => { if (e.key === 'Escape') close(); }}
+      >
+        <figure className="lightbox-frame">
+          <img src={mePhoto} alt={t.name} />
+          <button type="button" className="lightbox-close" onClick={close} aria-label={t.close}>✕</button>
+          <figcaption className="lightbox-caption">
+            <span className="dot" aria-hidden="true" />
+            {t.portraitCaption}
+          </figcaption>
+        </figure>
+      </dialog>
+    </>
+  );
+}
 
 /* ── Hero canvas ─────────────────────────────────────────────────────────
    A live service graph: packets travel the edges, nodes pulse on arrival and
@@ -435,10 +480,15 @@ function HeroGraph({ accent }) {
 
     /* A ResizeObserver, not a window listener: the effect can run before the
        canvas has been laid out, and a window-only listener would leave the
-       backing store at 0 until the visitor happened to resize. */
+       backing store at 0 until the visitor happened to resize. The timeout is
+       a second chance for that same first measurement — ResizeObserver
+       callbacks are delivered with the rendering steps, which a backgrounded
+       tab suspends, so a page opened in a background tab would otherwise show
+       an unsized canvas until it was focused. */
     const ro = new ResizeObserver(resize);
     ro.observe(cv);
     resize();
+    const settle = setTimeout(resize, 0);
 
     let heroIo;
     const hero = document.getElementById('hero');
@@ -452,6 +502,7 @@ function HeroGraph({ accent }) {
 
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(settle);
       ro.disconnect();
       parent.removeEventListener('mousemove', onMove);
       parent.removeEventListener('mouseleave', onLeave);
@@ -813,6 +864,7 @@ export default function App() {
   return (
     <div className="page" dir={t.dir}>
       <nav className="nav">
+        <Portrait t={t} />
         <a href="#hero" className="nav-brand">
           <span className="nav-mark" aria-hidden="true" />
           YI
@@ -834,9 +886,6 @@ export default function App() {
 
         <div className="hero-inner">
           <div className="hero-content">
-            <span className="avatar">
-              <img src={mePhoto} alt={t.name} width="92" height="92" />
-            </span>
             <p className="prompt">
               <span className="prompt-host">youssef@backend:~$</span>
               {t.whoami}
