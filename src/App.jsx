@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import mePhoto from './assets/me.jpg';
 
 const CV_URL = '/uploads/Youssef_Ibrahim_Backend_NET_CV.pdf';
 const GITHUB_USER = 'https://github.com/YoussefIbrahim13';
@@ -833,6 +834,9 @@ export default function App() {
 
         <div className="hero-inner">
           <div className="hero-content">
+            <span className="avatar">
+              <img src={mePhoto} alt={t.name} width="92" height="92" />
+            </span>
             <p className="prompt">
               <span className="prompt-host">youssef@backend:~$</span>
               {t.whoami}

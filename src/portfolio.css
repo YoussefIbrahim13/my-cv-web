@@ -114,6 +114,35 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 }
 .hero-content { max-width: 640px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6); }
 
+/* Portrait. The source is a bright full-body outdoor shot, so it gets a tight
+   head-and-shoulders crop in CSS (the file stays untouched) and is grounded
+   with an edge and ambient darkness rather than the system's .lighten wrapper —
+   .lighten only dissolves values darker than the page, and nothing in a sunny
+   photo is. Crop box in source pixels: 210x210 at (247,161) of 726x968 —
+   head and shoulders, eyes about 40% down the circle. */
+.avatar {
+  position: relative; flex: none;
+  width: 92px; height: 92px; border-radius: 50%; overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ac) 38%, transparent);
+  box-shadow: 0 0 30px -10px color-mix(in srgb, var(--ac) 50%, transparent);
+}
+.avatar img {
+  position: absolute;
+  /* max-width:none overrides the system's img reset, which would otherwise
+     clamp this zoom back to 100% and show the whole full-body frame. */
+  width: 345.7%; max-width: none; height: auto;
+  left: -117.6%; top: -76.7%;
+  filter: saturate(.9) contrast(1.03) brightness(.95);
+}
+/* Ambient darkness at the rim so the photo settles onto the ground instead of
+   sitting on top of it. */
+.avatar::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 50% 38%,
+    transparent 42%,
+    color-mix(in srgb, var(--color-bg) 60%, transparent) 100%);
+}
+
 .prompt {
   margin: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   font-family: var(--mono); font-size: 12.5px; letter-spacing: .1em; color: var(--ac);
@@ -430,6 +459,7 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .face-back { position: absolute; inset: 0; height: 100%; }
   .card.is-flipped .face-front { visibility: hidden; }
   .hero { min-height: 560px; }
+  .avatar { width: 72px; height: 72px; }
   .pipeline-row { font-size: 9.5px; gap: 6px; }
   .nav-link { padding: 7px 6px; }
 }
