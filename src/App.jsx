@@ -60,18 +60,19 @@ const TEXT = {
   },
 };
 
-/* The hero graph mirrors Petzy's real module map: one API host, eight bounded
-   modules, one SQL Server database. */
+/* The hero graph is the shape of a backend in general — the layers and concerns
+   that recur across every project below — rather than any one system's module
+   map. Individual systems get their own diagram on their card. */
 const NODES = [
-  { label: 'API Host', x: 0.545, y: 0.2, kind: 'gate' },
-  { label: 'Security', x: 0.72, y: 0.1, kind: 'svc' },
-  { label: 'Clinics', x: 0.9, y: 0.19, kind: 'svc' },
-  { label: 'Pets', x: 0.665, y: 0.36, kind: 'svc' },
-  { label: 'Appointments', x: 0.855, y: 0.42, kind: 'svc' },
-  { label: 'E-commerce', x: 0.6, y: 0.55, kind: 'svc' },
-  { label: 'Chat', x: 0.775, y: 0.615, kind: 'svc' },
-  { label: 'Chatbot', x: 0.935, y: 0.7, kind: 'svc' },
-  { label: 'Video Calls', x: 0.685, y: 0.775, kind: 'svc' },
+  { label: 'API', x: 0.545, y: 0.2, kind: 'gate' },
+  { label: 'Auth · JWT', x: 0.72, y: 0.1, kind: 'svc' },
+  { label: 'Controllers', x: 0.88, y: 0.19, kind: 'svc' },
+  { label: 'CQRS', x: 0.665, y: 0.36, kind: 'svc' },
+  { label: 'Domain', x: 0.855, y: 0.42, kind: 'svc' },
+  { label: 'Workers', x: 0.6, y: 0.55, kind: 'svc' },
+  { label: 'Real-time', x: 0.775, y: 0.615, kind: 'svc' },
+  { label: 'AI Services', x: 0.9, y: 0.7, kind: 'svc' },
+  { label: 'Cache', x: 0.685, y: 0.775, kind: 'svc' },
   { label: 'SQL Server', x: 0.83, y: 0.885, kind: 'db' },
 ];
 const EDGES = [
