@@ -559,22 +559,32 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
     touch-action: pan-y;
   }
   .hero-veil { display: none; }
-  .pipeline { order: 3; position: static; margin-top: var(--space-6); }
+  /* align-self, or the hero's `align-items: center` sizes this to its content
+     (~940px) instead of the viewport — the row then overflows and is clipped
+     rather than becoming scrollable. */
+  .pipeline {
+    order: 3; position: static; margin-top: var(--space-6);
+    align-self: stretch; width: 100%;
+  }
   .scrollhint { display: none; }
 
-  /* The full trace is far wider than a phone, so it wraps rather than scrolls
-     sideways — every stage has to be readable without swiping. flex:none plus
-     nowrap keeps each chip whole, so the rows break between chips instead of
-     inside their labels. */
+  /* The full trace is far wider than a phone, so it stays one line and scrolls
+     sideways — a wrapped block loses the shape of a pipeline. The edge fade is
+     the affordance: content dissolving at the boundary is what tells you it
+     continues, since iOS only shows a scrollbar while you are already
+     scrolling. overscroll-behavior stops a swipe past the end from triggering
+     the browser's back gesture. */
   .pipeline-row {
-    font-size: 9px; gap: 5px;
-    flex-wrap: wrap;
-    padding: 11px var(--gutter);
+    font-size: 9.5px; gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
   }
+  .pipeline-row::-webkit-scrollbar { display: none; }
+  /* flex:none, or the chips shrink and wrap their own labels instead of
+     letting the row overflow. */
   .pipeline-row > * { flex: none; white-space: nowrap; }
-  .pipe-endpoint, .pipe-stage, .pipe-status { padding: 4px 6px; }
-  /* The flexible spacer can't do its job across wrapped lines; an auto margin
-     pushes the result chip to the end of whichever line it lands on. */
-  .pipe-gap { display: none; }
-  .pipe-status { margin-inline-start: auto; }
 }
