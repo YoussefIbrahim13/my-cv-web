@@ -318,7 +318,7 @@ function Portrait({ t }) {
    A live service graph: packets travel the edges, nodes pulse on arrival and
    the three nearest nodes trace to the cursor. Paused when the hero scrolls
    away so it costs nothing once the visitor is reading the projects. */
-function HeroGraph({ accent }) {
+function HeroGraph({ accent, rtl }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -350,7 +350,12 @@ function HeroGraph({ accent }) {
          right. Re-read on every resize so a rotation switches layouts. */
       compact = w < 620;
       nodes.forEach((n) => {
-        n.cx = compact ? n.mx : n.x;
+        const base = compact ? n.mx : n.x;
+        /* Mirror for RTL. On desktop the layout hugs one side to leave the
+           text column clear — in Arabic the text moves to the right, so the
+           graph has to move to the left or it reads straight through the copy.
+           It also keeps the flow running with the reading direction. */
+        n.cx = rtl ? 1 - base : base;
         n.cy = compact ? n.my : n.y;
         n.px = n.cx * w;
         n.py = n.cy * h;
@@ -617,7 +622,7 @@ function HeroGraph({ accent }) {
       cv.removeEventListener('touchcancel', onTouchEnd);
       if (heroIo) heroIo.disconnect();
     };
-  }, [accent]);
+  }, [accent, rtl]);
 
   return <canvas ref={canvasRef} className="hero-canvas" aria-hidden="true" />;
 }
@@ -996,7 +1001,7 @@ export default function App() {
       </nav>
 
       <section id="hero" className="hero">
-        <HeroGraph accent={ACCENT} />
+        <HeroGraph accent={ACCENT} rtl={t.dir === 'rtl'} />
         <div className="hero-veil" />
 
         <div className="hero-inner">
