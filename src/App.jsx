@@ -21,15 +21,16 @@ const TEXT = {
     name: 'Youssef Ibrahim',
     role: 'Software Engineer — .NET · Python · Flutter',
     summary:
-      "I'm a Computer Science graduate who builds systems end to end: .NET APIs on Clean Architecture and CQRS, Python services for LLM agents, and offline-first Flutter apps. Six shipped so far — authentication, payments, background jobs, real-time and AI.",
+      'Computer Science graduate based in Cairo. I like taking a system the whole way — the data model, the architecture, and seeing it through to something that runs. Mostly backend services and APIs, with AI tooling and mobile apps alongside.',
     chipLoc: 'CAIRO, EGYPT',
+    chipService: 'MILITARY SERVICE: EXEMPTED',
     ctaProjects: 'VIEW PROJECTS',
     ctaCv: 'DOWNLOAD CV',
     scroll: 'SCROLL',
     projectsKicker: 'PROJECTS',
     projectsTitle: 'Systems I designed and shipped',
     projectsIntro:
-      'Six systems, each with a different architectural problem at its centre — bounded modules under one host, a rental lifecycle as a state machine, two APIs under one orchestrator, a hybrid AI fact-checker, an offline-first client, and an agent graph that validates what it finds.',
+      'Each of these put a different architectural problem at its centre — bounded modules under one host, a rental lifecycle as a state machine, two APIs under one orchestrator, a hybrid AI fact-checker, an offline-first client, and an agent graph that validates what it finds.',
     flipHint: 'CLICK ANY CARD TO SEE ITS ARCHITECTURE',
     seeArch: 'SEE ARCHITECTURE',
     archLabel: 'MODULE MAP',
@@ -48,15 +49,16 @@ const TEXT = {
     name: 'يوسف إبراهيم',
     role: 'مهندس برمجيات — ‎.NET · Python · Flutter',
     summary:
-      'خريج علوم حاسب، أبني أنظمة متكاملة من أولها لآخرها: واجهات ‎.NET‎ برمجية على Clean Architecture و CQRS، وخدمات Python لوكلاء الذكاء الاصطناعي، وتطبيقات Flutter تعمل دون اتصال. ستة أنظمة أنجزتها حتى الآن تغطي المصادقة والمدفوعات ومهام الخلفية والاتصال الفوري والذكاء الاصطناعي.',
+      'خريج علوم حاسب من القاهرة. بحب أمشي مع النظام من أوله لآخره — تصميم البيانات، واختيار المعمارية، وتنفيذها لحد ما تشتغل فعليًا. معظم شغلي في خدمات وواجهات الـ Backend، وجنبها أدوات الذكاء الاصطناعي وتطبيقات الموبايل.',
     chipLoc: 'القاهرة، مصر',
+    chipService: 'الخدمة العسكرية: إعفاء',
     ctaProjects: 'استعرض المشاريع',
     ctaCv: 'تحميل السيرة',
     scroll: 'انزل',
     projectsKicker: 'المشاريع',
     projectsTitle: 'أنظمة صمّمتها ونفّذتها',
     projectsIntro:
-      'ستة أنظمة، كل منها يضع مشكلة معمارية مختلفة في قلبه: وحدات محدودة خلف مضيف واحد، دورة تأجير كآلة حالات، واجهتان تحت منسّق واحد، مدقّق حقائق هجين بالذكاء الاصطناعي، تطبيق يعمل دون اتصال، ووكيل يتحقق ممّا يجده قبل أن يعرضه.',
+      'كل واحد من دول وضع مشكلة معمارية مختلفة في قلبه: وحدات محدودة خلف مضيف واحد، دورة تأجير كآلة حالات، واجهتان تحت منسّق واحد، مدقّق حقائق هجين بالذكاء الاصطناعي، تطبيق يعمل دون اتصال، ووكيل يتحقق ممّا يجده قبل أن يعرضه.',
     flipHint: 'اضغط أي بطاقة لعرض معماريتها',
     seeArch: 'اعرض المعمارية',
     archLabel: 'خريطة الوحدات',
@@ -1009,6 +1011,7 @@ export default function App() {
             <p className="hero-summary">{t.summary}</p>
             <div className="chips">
               <span className="chip">{t.chipLoc}</span>
+              <span className="chip">{t.chipService}</span>
               <span className="chip">.NET 8 · ASP.NET CORE</span>
               <span className="chip">CLEAN ARCH · CQRS</span>
               <span className="chip">PYTHON · FASTAPI · LLM</span>
