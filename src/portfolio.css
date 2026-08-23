@@ -562,17 +562,19 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .pipeline { order: 3; position: static; margin-top: var(--space-6); }
   .scrollhint { display: none; }
 
-  /* Wrapping turned the request trace into a four-row block that ate the
-     screen. One swipeable line keeps it a trace. */
+  /* The full trace is far wider than a phone, so it wraps rather than scrolls
+     sideways — every stage has to be readable without swiping. flex:none plus
+     nowrap keeps each chip whole, so the rows break between chips instead of
+     inside their labels. */
   .pipeline-row {
-    font-size: 9.5px; gap: 6px;
-    flex-wrap: nowrap; overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+    font-size: 9px; gap: 5px;
+    flex-wrap: wrap;
+    padding: 11px var(--gutter);
   }
-  .pipeline-row::-webkit-scrollbar { display: none; }
-  /* flex:none or the chips shrink and wrap their own text, which puts the
-     "single line" back onto three. */
   .pipeline-row > * { flex: none; white-space: nowrap; }
+  .pipe-endpoint, .pipe-stage, .pipe-status { padding: 4px 6px; }
+  /* The flexible spacer can't do its job across wrapped lines; an auto margin
+     pushes the result chip to the end of whichever line it lands on. */
   .pipe-gap { display: none; }
+  .pipe-status { margin-inline-start: auto; }
 }
