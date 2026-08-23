@@ -837,7 +837,7 @@ const ARCH = {
    Front is the pitch, back is the architecture. The whole card is the flip
    control, so it carries button semantics and an Enter/Space handler; the
    GitHub link on the back stops propagation so it doesn't flip back. */
-function ProjectCard({ project, lang, t, flipped, onFlip }) {
+function ProjectCard({ project, lang, t, flipped, onFlip, index }) {
   const copy = project[lang];
   const Arch = ARCH[project.id];
   const cardRef = useRef(null);
@@ -884,6 +884,9 @@ function ProjectCard({ project, lang, t, flipped, onFlip }) {
       aria-label={`${project.title} — ${t.seeArch}`}
       onClick={onFlip}
       onKeyDown={onKeyDown}
+      /* Cards sit two-up, so staggering by column lets a pair land one after
+         the other instead of together. */
+      style={{ '--reveal-delay': `${(index % 2) * 90}ms` }}
       className={[
         'card',
         project.wide ? 'card-wide' : '',
@@ -1061,10 +1064,11 @@ export default function App() {
           <p className="flip-hint">{t.flipHint}</p>
 
           <div className="grid">
-            {PROJECTS.map((p) => (
+            {PROJECTS.map((p, i) => (
               <ProjectCard
                 key={p.id}
                 project={p}
+                index={i}
                 lang={lang}
                 t={t}
                 flipped={!!flipped[p.id]}

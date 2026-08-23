@@ -325,8 +325,11 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 
 .card-inner {
   position: relative; width: 100%; height: 100%;
-  transform-style: preserve-3d;
+  transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
   transition: transform .85s cubic-bezier(.2, .85, .2, 1);
+  /* Promote the turning element so the compositor animates it rather than
+     repainting both faces every frame — the difference is visible on a phone. */
+  will-change: transform;
 }
 .card.is-flipped .card-inner { transform: rotateY(180deg); }
 
@@ -502,9 +505,20 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 
 /* ── Reveal-on-scroll ──────────────────────────────────────────────────── */
 
-.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.2, .8, .2, 1), transform .7s cubic-bezier(.2, .8, .2, 1); }
+/* Cards rise and settle as they come into view. --reveal-delay staggers a row
+   so a pair doesn't land in lockstep; the slight scale gives the lift some
+   depth rather than a plain slide. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(.985);
+  transition:
+    opacity .68s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms),
+    transform .68s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms);
+}
 .reveal.is-in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
 
 /* ── Narrow screens ────────────────────────────────────────────────────── */
 
@@ -525,7 +539,16 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
   .face { position: relative; height: auto; min-height: 560px; }
   /* On a phone the two faces stack in flow, so the back is hidden until flipped. */
   .face-back { position: absolute; inset: 0; height: 100%; }
+  /* backface-visibility is unreliable on mobile WebKit, so the front is also
+     hidden outright — but only at the halfway point of the turn. Switching it
+     at once (the obvious way) blanks the front on the very first frame and you
+     watch the back swing into an empty card. */
+  .face-front { transition: border-color .25s ease, box-shadow .25s ease, visibility 0s linear .34s; }
   .card.is-flipped .face-front { visibility: hidden; }
+  /* A nearer vanishing point: 1600px of perspective across a 390px card is so
+     shallow the turn reads as a flat cross-fade rather than a flip. */
+  .card, .card-wide { perspective: 900px; }
+  .card-inner { transition-duration: .68s; }
   .hero { min-height: 560px; }
 
   /* The four actions can't fit one row on a phone and were wrapping the fixed
