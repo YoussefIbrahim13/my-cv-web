@@ -841,30 +841,34 @@ function ProjectCard({ project, lang, t, flipped, onFlip, index }) {
   const copy = project[lang];
   const Arch = ARCH[project.id];
   const cardRef = useRef(null);
-  // Reduced motion opts out of the reveal entirely — start visible rather than
-  // fading in, so no effect has to correct the state after the first render.
-  const [revealed, setRevealed] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  /* Reduced motion — or a browser with no IntersectionObserver — opts out of
+     the reveal entirely and the card simply stays visible, so no effect has to
+     correct the state after the first render. */
+  const [skipReveal] = useState(
+    () => matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window),
+  );
+  const [inView, setInView] = useState(skipReveal);
 
   useEffect(() => {
+    if (skipReveal) return;
     const el = cardRef.current;
-    if (!el || revealed) return;
+    if (!el) return;
+    /* Deliberately not one-shot: the observer stays connected and tracks the
+       card both ways, so it fades back out on the way up and returns coming
+       down. That also removes the need for the old "never leave it stuck
+       invisible" timeout — the first callback always reports the true state. */
+    let delivered = false;
     const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setRevealed(true);
-          io.disconnect();
-        }
-      },
+      ([e]) => { delivered = true; setInView(e.isIntersecting); },
       { rootMargin: '0px 0px -8% 0px' },
     );
     io.observe(el);
-    // Safety net: never leave a card stuck invisible if the observer misses it.
-    const fallback = setTimeout(() => setRevealed(true), 4000);
-    return () => {
-      io.disconnect();
-      clearTimeout(fallback);
-    };
-  }, [revealed]);
+    /* If the observer never reports at all, show the card rather than leave it
+       permanently invisible. Conditioned on having heard nothing, so it can't
+       fight the observer once that is working. */
+    const guard = setTimeout(() => { if (!delivered) setInView(true); }, 3000);
+    return () => { io.disconnect(); clearTimeout(guard); };
+  }, [skipReveal]);
 
   const onKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -891,7 +895,7 @@ function ProjectCard({ project, lang, t, flipped, onFlip, index }) {
         'card',
         project.wide ? 'card-wide' : '',
         'reveal',
-        revealed ? 'is-in' : '',
+        inView ? 'is-in' : '',
         flipped ? 'is-flipped' : '',
       ].filter(Boolean).join(' ')}
     >

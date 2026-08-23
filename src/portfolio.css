@@ -505,19 +505,30 @@ a:hover { color: color-mix(in srgb, var(--ac) 70%, #ffffff); }
 
 /* ── Reveal-on-scroll ──────────────────────────────────────────────────── */
 
-/* Cards rise and settle as they come into view. --reveal-delay staggers a row
-   so a pair doesn't land in lockstep; the slight scale gives the lift some
-   depth rather than a plain slide. */
+/* Cards rise and settle as they come into view, and sink back out as they
+   leave — the observer tracks them both ways. The slight scale gives the lift
+   some depth rather than a plain slide.
+
+   A transition is read from the state being moved *to*, so these two rules set
+   the two directions independently: leaving is quicker and un-staggered so
+   cards clear promptly, while arriving is slower and offset by --reveal-delay
+   so a pair doesn't land in lockstep. */
 .reveal {
   opacity: 0;
   transform: translateY(28px) scale(.985);
   transition:
+    opacity .42s cubic-bezier(.4, 0, .6, 1),
+    transform .42s cubic-bezier(.4, 0, .6, 1);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
     opacity .68s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms),
     transform .68s cubic-bezier(.2, .8, .2, 1) var(--reveal-delay, 0ms);
 }
-.reveal.is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal, .reveal.is-in { opacity: 1; transform: none; transition: none; }
 }
 
 /* ── Narrow screens ────────────────────────────────────────────────────── */
