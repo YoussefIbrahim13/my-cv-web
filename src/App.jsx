@@ -139,6 +139,11 @@ const PIPELINE = [
   'SQL SERVER',
 ];
 
+/* Petzy's eight modules, and the two Youssef owned end to end — highlighted on
+   the card so the claim in the copy is visible in the module map too. */
+const PETZY_MODULES = ['Security', 'Clinics', 'Pets', 'Appointments', 'E-commerce', 'Chat', 'Chatbot', 'Video Calls'];
+const PETZY_OWNED = ['Security', 'Chatbot'];
+
 const PROJECTS = [
   {
     id: 'petzy',
@@ -151,13 +156,13 @@ const PROJECTS = [
     en: {
       tag: 'GRADUATION PROJECT',
       sub: 'Backend Developer · veterinary care platform',
-      desc: 'The backend for a full veterinary platform serving a Flutter client and an AI service: eight bounded modules behind a single API host, with cross-cutting concerns in a shared Building Blocks layer. I owned the appointment booking domain end to end — entities, validation rules and the API contracts the mobile team consumed across a multi-repo Git workflow.',
+      desc: 'The backend for a full veterinary platform serving a Flutter client and an AI service: eight bounded modules behind a single API host, with cross-cutting concerns in a shared Building Blocks layer. I owned Security and Chatbot end to end — Identity with JWT refresh tokens, Google sign-in, role seeding and audit logs; and a chatbot that streams AI tokens over SignalR through a MediatR stream.',
       note: 'Modular monolith — module boundaries enforced in code, one deployable, one database.',
     },
     ar: {
       tag: 'مشروع التخرج',
       sub: 'مطوّر Backend · منصة رعاية بيطرية',
-      desc: 'الواجهة الخلفية لمنصة رعاية بيطرية متكاملة تخدم تطبيق Flutter وخدمة ذكاء اصطناعي: ثماني وحدات محدودة خلف مضيف API واحد، مع الاهتمامات المشتركة في طبقة Building Blocks. توليت نطاق حجز المواعيد بالكامل — الكيانات وقواعد التحقق وعقود الـ API التي استهلكها فريق الموبايل عبر سير عمل متعدد المستودعات.',
+      desc: 'الواجهة الخلفية لمنصة رعاية بيطرية متكاملة تخدم تطبيق Flutter وخدمة ذكاء اصطناعي: ثماني وحدات محدودة خلف مضيف API واحد، مع الاهتمامات المشتركة في طبقة Building Blocks. توليت وحدتَي Security و Chatbot بالكامل — Identity مع JWT ورموز التحديث، وتسجيل الدخول بجوجل، وتهيئة الأدوار وسجلّات التدقيق؛ وروبوت محادثة يبثّ ردود الذكاء الاصطناعي عبر SignalR من خلال تدفّق MediatR.',
       note: 'Modular Monolith — حدود الوحدات مفروضة في الكود، نشر واحد وقاعدة بيانات واحدة.',
     },
   },
@@ -619,7 +624,10 @@ function HeroGraph({ accent }) {
    One per project, drawn from the real repository layout. */
 
 function PetzyArch({ t }) {
+  /* Short labels for the compact host box; the lit pair is the same one the
+     front of the card marks, so both faces agree on what he owned. */
   const mods = ['Security', 'Clinics', 'Pets', 'Appts', 'Shop', 'Chat', 'Bot', 'Calls'];
+  const owned = ['Security', 'Bot'];
   return (
     <>
       <div className="arch-cols">
@@ -632,7 +640,7 @@ function PetzyArch({ t }) {
           <span className="host-label">SINGLE API HOST</span>
           <div className="mods mods-sm">
             {mods.map((m) => (
-              <span className="mod" key={m}>{m}</span>
+              <span className={`mod${owned.includes(m) ? ' mod-lit' : ''}`} key={m}>{m}</span>
             ))}
           </div>
           <span className="node node-dash" style={{ fontSize: 9 }}>BUILDING BLOCKS — cross-cutting</span>
@@ -901,8 +909,8 @@ function ProjectCard({ project, lang, t, flipped, onFlip }) {
             <div className="wide-side">
               <p className="wide-side-label">8 BOUNDED MODULES</p>
               <div className="mods">
-                {['Security', 'Clinics', 'Pets', 'Appointments', 'E-commerce', 'Chat', 'Chatbot', 'Video Calls'].map((m) => (
-                  <span className={`mod${m === 'Appointments' ? ' mod-lit' : ''}`} key={m}>{m}</span>
+                {PETZY_MODULES.map((m) => (
+                  <span className={`mod${PETZY_OWNED.includes(m) ? ' mod-lit' : ''}`} key={m}>{m}</span>
                 ))}
               </div>
               <p className="wide-side-foot">↳ Building Blocks · one API host · Stripe inside E-commerce</p>
